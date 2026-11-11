@@ -2048,7 +2048,8 @@
   var CONCERT_CD = 25000, concertNext = 0;
   var DANCE = [{ a: -12, y: 0, sx: 1, sy: 1 }, { a: -12, y: -16, sx: 0.95, sy: 1.07 }, { a: 12, y: 0, sx: 1, sy: 1 }, { a: 12, y: -16, sx: 0.95, sy: 1.07 },
                { a: 0, y: 0, sx: 1.13, sy: 0.85 }, { a: 0, y: -42, sx: 0.9, sy: 1.14 }, { a: -7, y: 0, sx: 1.05, sy: 0.95 }, { a: 7, y: -9, sx: 1, sy: 1.03 }];
-  function concertMusic(B) {   // B = długość ćwierćnuty w sekundach
+  function concertMusic(B, off, last) {   // B = długość ćwierćnuty w sekundach, off = przesunięcie startu (s), last = akord na koniec
+    off = off || 0;
     var N = { C4: 261.6, D4: 293.7, E4: 329.6, F4: 349.2, G4: 392, A4: 440, B4: 493.9, C5: 523.3, D5: 587.3, E5: 659.3, F5: 698.5, G5: 784, A5: 880, C6: 1046.5 };
     var mel = [   // [takt (ćwierćnuty od startu), nuta, długość]
       [4, 'E5', 1], [5, 'G5', 1], [6, 'E5', 0.5], [6.5, 'D5', 0.5], [7, 'C5', 1],
@@ -2057,23 +2058,23 @@
       [16, 'D5', 0.5], [16.5, 'E5', 0.5], [17, 'D5', 1], [18, 'C5', 2],
       [20, 'E5', 1], [21, 'G5', 1], [22, 'E5', 0.5], [22.5, 'D5', 0.5], [23, 'C5', 1],
       [24, 'F5', 0.5], [24.5, 'A5', 0.5], [25, 'G5', 1], [26, 'E5', 0.5], [26.5, 'G5', 0.5], [27, 'C6', 1.6]];
-    mel.forEach(function (m) { var f = N[m[1]], at = m[0] * B, d = m[2] * B * 0.92;
+    mel.forEach(function (m) { var f = N[m[1]], at = off + m[0] * B, d = m[2] * B * 0.92;
       tone(f * 0.82, at, 0.07, 'triangle', 0.075, f); tone(f, at + 0.06, d, 'triangle', 0.075);   // „miau”: krótki podjazd do nuty
       tone(f * 0.794, at + 0.06, d, 'sine', 0.03); });                                             // drugi głos (tercja niżej)
     var bass = [130.8, 130.8, 98, 130.8, 110, 98, 130.8];   // C C G C Am G C
-    for (var b = 0; b < 28; b++) { var at = b * B;
+    for (var b = 0; b < 28; b++) { var at = off + b * B;
       tone(bass[Math.floor(b / 4)] * (b % 2 ? 1.5 : 1), at, B * 0.8, 'sine', 0.11);
       tone(150, at, 0.11, 'sine', 0.16, 48);                                  // stopa
       if (b % 2) noise(at, 0.09, 0.06, 1900, 900);                            // klaśnięcie
       noise(at + B / 2, 0.03, 0.022, 7000, 6000); }                           // hi-hat
-    [523.3, 659.3, 784, 1046.5].forEach(function (f) { tone(f, 28 * B, 0.9, 'triangle', 0.05); });   // akord na koniec
+    if (last) [523.3, 659.3, 784, 1046.5].forEach(function (f) { tone(f, off + 28 * B, 0.9, 'triangle', 0.05); });   // akord na koniec
   }
   function startConcert(s) {
     if (H.concert || modalObjs.length || H.building) return;
     var cats = cells.filter(function (c) { return c && c.type === 'cat'; });
     if (Date.now() < concertNext || !cats.length) { sfx('nope'); return; }
     H.concert = true; var B = 60 / 132, STEPS = 56, i = 0, cols = [0xff5a9a, 0xffc93a, 0x3ecf6b, 0x3a9bff, 0xb36bff];
-    concertMusic(B);
+    concertMusic(B, 0, true);
     var light = s.add.rectangle(GW / 2, GH / 2, GW, GH, cols[0], 0.11).setDepth(15).setBlendMode(Phaser.BlendModes.ADD);
     var notes = []; for (var n = 0; n < 8; n++) notes.push(inWorld(function () { return txt(s, 0, 0, n % 2 ? '♪' : '♫', 44, '#ffffff', '#ff5a9a').setDepth(210).setVisible(false); }));
     cats.forEach(function (c) { s.tweens.killTweensOf(c.hopper); });
@@ -2094,6 +2095,66 @@
           s.tweens.add({ targets: t, y: t.y - 80, alpha: 0, duration: 900, ease: 'Sine.easeOut' }); } }
       i++; if (i >= STEPS) s.time.delayedCall(B * 500, finish);
     } });
+  }
+
+
+  // ================= Etap 47: KOCI TANIEC – gra rytmiczna =================
+  //   Łapki jadą z prawej do kółka; stuknięcie, gdy łapka jest w kółku = trafienie, a kotek robi figurę taneczną. Nie da się przegrać: nagroda zawsze, gwiazdki za celność.
+  //   Muzyka: ta sama własna melodia co w Koncercie (wolniej, dwa przebiegi). Zegar gry = zegar dźwięku, więc łapki zawsze trafiają w rytm.
+  var DANCE_GEMS = 20, danceNext = 0, DN = null, DN_BPM = 104, DN_TRAVEL = 1.9, DN_WIN = 0.26, DN_RX = 360, DN_RY = 1010, DN_X0 = 800;
+  function danceReady() { return mgReady('dance'); }
+  function openDance(s, locked, pick) {
+    if (modalObjs.length || (!locked && !danceReady())) return; overlay(s); fxTex(s);
+    var B = 60 / DN_BPM, beats = [], i; for (i = 4; i <= 26; i += 2) beats.push(i); for (i = 0; i < 6; i++) { beats.push(32 + i * 4, 33 + i * 4, 34 + i * 4); }
+    var m = DN = { s: s, B: B, notes: [], hits: 0, total: beats.length, done: false, pose: 0, end: 56 * B + 1.4 };
+    mAdd(s.add.rectangle(GW / 2, GH / 2, GW, GH, 0x2b1b4d), 1001);
+    [[150, 0xff5a9a], [570, 0x3a9bff]].forEach(function (q) { mAdd(s.add.image(q[0], 330, 'fxGlow').setBlendMode(Phaser.BlendModes.ADD).setTint(q[1]).setAlpha(0.35).setScale(3.4, 5), 1002); });
+    m.spot = mAdd(s.add.image(GW / 2, 520, 'fxGlow').setBlendMode(Phaser.BlendModes.ADD).setTint(0xffe9a8).setAlpha(0.55).setScale(3), 1002);
+    mAdd(s.add.ellipse(GW / 2, 700, 420, 70, 0x4a2f7a), 1002);
+    mAdd(txt(s, 330, 130, 'Koci taniec!', 54, '#ffffff', '#b36bff'), 1011); mAdd(txt(s, GW / 2, 205, 'Stuknij, gdy łapka jest w kółku!', 28, '#e9dcff'), 1011);
+    m.cnt = mAdd(txt(s, GW / 2, 262, '🐾 0', 34, '#ffe14d', '#a86b00'), 1011);
+    var cat = m.cat = buildCat(s, pick ? pick.l : 1, { anim: true, secret: pick ? pick.sec : undefined }); cat.outer.setPosition(GW / 2, 690).setScale(1.25); mAdd(cat.outer, 1005);
+    var lane = mAdd(s.add.graphics(), 1003); lane.fillStyle(0x3d2a66, 1).fillRoundedRect(-20, DN_RY - 62, GW + 40, 124, 62);
+    m.ring = mAdd(s.add.circle(DN_RX, DN_RY, 64, 0xffffff, 0.12).setStrokeStyle(9, 0xffffff), 1004);
+    m.fb = mAdd(txt(s, DN_RX, DN_RY - 120, '', 46, '#ffffff', '#ff5a9a').setAlpha(0), 1012);
+    var cols = [0xff5a9a, 0xffc93a, 0x3ecf6b, 0x3a9bff, 0xb36bff];
+    beats.forEach(function (b, k) { var c = s.add.container(DN_X0, DN_RY, [s.add.circle(0, 0, 46, cols[k % 5]).setStrokeStyle(6, 0xffffff), txt(s, 0, 2, '🐾', 44)]).setVisible(false); mAdd(c, 1006); m.notes.push({ t: b * B, sp: c, st: 0 }); });
+    // muzyka na własnej szynie – przy wyjściu z gry cichnie od razu
+    m.t0p = performance.now() / 1000 + 0.15; m.useAudio = false;
+    try { if (!muted) { AUC = AUC || new (window.AudioContext || window.webkitAudioContext)(); if (AUC.state === 'suspended') AUC.resume(); m.bus = AUC.createGain(); m.bus.connect(AUC.destination); H.musicBus = m.bus;
+        concertMusic(B, 0.15, false); concertMusic(B, 0.15 + 28 * B, true); H.musicBus = null; m.t0a = AUC.currentTime + 0.15; m.useAudio = true; } } catch (e) { H.musicBus = null; }
+    H.musicBus = null;
+    function now() { return m.useAudio && AUC && AUC.state === 'running' ? AUC.currentTime - m.t0a : performance.now() / 1000 - m.t0p; }
+    function setPose(p, big) { if (!cat.outer.scene) return; var k = big ? 1 : 0.45; cat.hopper.setPosition(0, FEET + p.y * k).setScale(1 + (p.sx - 1) * k, 1 + (p.sy - 1) * k).setAngle(p.a * k); }
+    function feedback(str, col) { m.fb.setText(str).setColor(col).setAlpha(1).setScale(0.6).setY(DN_RY - 120); s.tweens.killTweensOf(m.fb); s.tweens.add({ targets: m.fb, alpha: 0, scale: 1.15, y: DN_RY - 170, duration: 520, ease: 'Sine.easeOut' }); }
+    var zone = mAdd(s.add.zone(GW / 2, GH / 2 + 100, GW, GH - 200).setInteractive(), 1007);
+    zone.on('pointerdown', function () {
+      if (m.done) return; var t = now(), best = null;
+      m.notes.forEach(function (n) { if (n.st === 0 && Math.abs(n.t - t) <= DN_WIN && (!best || Math.abs(n.t - t) < Math.abs(best.t - t))) best = n; });
+      s.tweens.killTweensOf(m.ring); m.ring.setScale(0.88); s.tweens.add({ targets: m.ring, scale: 1, duration: 160 });
+      if (!best) { tone(240, 0, 0.06, 'sine', 0.05); return; }
+      best.st = 1; m.hits++; m.cnt.setText('🐾 ' + m.hits); m.pose = (m.pose + 1 + (m.hits % 3 === 0 ? 3 : 0)) % 8; setPose(DANCE[m.pose], true); m.poseAt = t;
+      tone(880, 0, 0.09, 'sine', 0.07, 1320); sparks(s, DN_RX, DN_RY, 6); feedback(Math.abs(best.t - t) < 0.1 ? 'Super!' : 'Dobrze!', '#ffffff');
+      s.tweens.add({ targets: best.sp, scale: 1.7, alpha: 0, duration: 220, onComplete: function () { best.sp.setVisible(false); } });
+    });
+    m.upd = function () {
+      if (m.done) return; var t = now(), bi = Math.floor(t / B * 2);
+      m.notes.forEach(function (n) { if (n.st !== 0) return; var dt = n.t - t;
+        if (dt < -DN_WIN - 0.02) { n.st = 2; s.tweens.add({ targets: n.sp, alpha: 0, y: DN_RY + 40, duration: 260, onComplete: function () { n.sp.setVisible(false); } }); return; }
+        if (dt < DN_TRAVEL) n.sp.setVisible(true).setX(DN_RX + (DN_X0 - DN_RX) * (dt / DN_TRAVEL)); });
+      if (bi !== m.bi) { m.bi = bi; m.spot.setAlpha(bi % 2 ? 0.4 : 0.6); if (m.poseAt == null || t - m.poseAt > B * 0.9) setPose(DANCE[(bi % 2) ? 1 : 3], false); }   // kotek sam lekko kiwa się w rytm
+      if (t >= m.end) danceWin(m);
+    }; s.events.on('update', m.upd);
+    var xb = mAdd(s.add.circle(652, 128, 34, 0xff3b3b).setStrokeStyle(6, 0xffffff).setInteractive(), 1013); mAdd(txt(s, 652, 126, '✕', 36, '#ffffff'), 1014); xb.on('pointerup', function () { danceCleanup(); });
+  }
+  function danceCleanup() { var m = DN; if (m) { m.done = true; m.s.events.off('update', m.upd); try { if (m.bus) { m.bus.gain.setValueAtTime(0, AUC.currentTime); m.bus.disconnect(); } } catch (e) { } } DN = null; closeModal(); }
+  function danceWin(m) {
+    var s = m.s; m.done = true; confetti(s); sfx('level'); var stars = m.hits >= m.total * 0.85 ? 3 : (m.hits >= m.total * 0.55 ? 2 : 1);
+    if (m.cat.outer.scene) m.cat.hopper.setPosition(0, FEET).setScale(1).setAngle(0);
+    var t = mAdd(txt(s, GW / 2, 330, 'Brawo, Leia!', 80, '#ffffff', '#e0529c'), 1015).setScale(0); s.tweens.add({ targets: t, scale: 1, duration: 450, ease: 'Back.easeOut' });
+    mAdd(txt(s, GW / 2, 840, ['⭐', '⭐⭐', '⭐⭐⭐'][stars - 1], 70, '#ffe14d'), 1015); mAdd(txt(s, GW / 2, 905, 'Trafione łapki: ' + m.hits + ' z ' + m.total, 30, '#e9dcff'), 1015);
+    mAdd(txt(s, GW / 2, 1010, '+' + DANCE_GEMS + ' 💎', 70, '#9fe8ff', '#2a4fb0'), 1015);
+    s.time.delayedCall(2800, function () { if (DN !== m) return; danceCleanup(); gems += DANCE_GEMS; flyGems(s, GW / 2, 600, DANCE_GEMS, DANCE_GEMS); updateHUD(); saveGame(); });
   }
 
   function hop(s, cat) {
@@ -2438,9 +2499,9 @@
   function advUpdate(s) { // wywoływane z update() sceny Phasera
     var now = Date.now(); if (now - advLast < 250) return; advLast = now;
     var any = false, redo = false, mr = memReady();
-    var mzr = mazeReady(), plr = peelReady(), m3r = m3Ready(), fnr = fnReady(), any3 = mr || mzr || plr || m3r || fnr;
-    if (H.mgLbl) { var nx = Math.min(mr ? 1e18 : memNext, mzr ? 1e18 : mazeNext, plr ? 1e18 : peelNext, m3r ? 1e18 : m3Next, fnr ? 1e18 : fnNext); H.mgLbl.setText(any3 ? 'Minigry' : fmtTime(nx - now)); H.mgCirc.setFillStyle(any3 ? 0xb36bff : 0xb9b3bd); }
-    if (H.mgTimers && H.mgTimers.length && H.mgTimers[0].t.scene) { if (H.mgSig !== mr + '|' + mzr + '|' + plr + '|' + m3r + '|' + fnr) renderMg(s); else H.mgTimers.forEach(function (q) { q.t.setText(fmtTime(q.fn() - now)); }); }
+    var mzr = mazeReady(), plr = peelReady(), m3r = m3Ready(), fnr = fnReady(), dnr = danceReady(), any3 = mr || mzr || plr || m3r || fnr || dnr;
+    if (H.mgLbl) { var nx = Math.min(mr ? 1e18 : memNext, mzr ? 1e18 : mazeNext, plr ? 1e18 : peelNext, m3r ? 1e18 : m3Next, fnr ? 1e18 : fnNext, dnr ? 1e18 : danceNext); H.mgLbl.setText(any3 ? 'Minigry' : fmtTime(nx - now)); H.mgCirc.setFillStyle(any3 ? 0xb36bff : 0xb9b3bd); }
+    if (H.mgTimers && H.mgTimers.length && H.mgTimers[0].t.scene) { if (H.mgSig !== mr + '|' + mzr + '|' + plr + '|' + m3r + '|' + fnr + '|' + dnr) renderMg(s); else H.mgTimers.forEach(function (q) { q.t.setText(fmtTime(q.fn() - now)); }); }
     advSlots.forEach(function (m) {
       if (advDone(m)) m.ready = true;
       if (m.ready) { any = true; if (!m.notified) { m.notified = true; floatText(s, GW / 2, 300, 'Przygoda gotowa!', '#ffffff', '#1f7a3c', 52, 1800); } }
@@ -2580,7 +2641,7 @@
   // Etap 38: minigry odnawiają się codziennie o 19:00 (czasu urządzenia), a nie co 24 h od gry. ?adv=N (testy) nadal skraca czas.
   var MG_RESET_HOUR = 19;
   function mgNextReset(from) { if (ADV_SPEED > 1) return from + 86400000 / ADV_SPEED; var d = new Date(from); d.setHours(MG_RESET_HOUR, 0, 0, 0); if (d.getTime() <= from) d.setDate(d.getDate() + 1); return d.getTime(); }
-  var MGK = { mem: [function () { return memNext; }, function (v) { memNext = v; }], maze: [function () { return mazeNext; }, function (v) { mazeNext = v; }], peel: [function () { return peelNext; }, function (v) { peelNext = v; }], m3: [function () { return m3Next; }, function (v) { m3Next = v; }], fn: [function () { return fnNext; }, function (v) { fnNext = v; }] };
+  var MGK = { mem: [function () { return memNext; }, function (v) { memNext = v; }], maze: [function () { return mazeNext; }, function (v) { mazeNext = v; }], peel: [function () { return peelNext; }, function (v) { peelNext = v; }], m3: [function () { return m3Next; }, function (v) { m3Next = v; }], fn: [function () { return fnNext; }, function (v) { fnNext = v; }], dance: [function () { return danceNext; }, function (v) { danceNext = v; }] };
   function mgReady(k) { if (devMode) return true;   // Etap 41: w trybie dev minigry bez limitu
     var now = Date.now(), n = MGK[k][0](), cap = mgNextReset(now); if (n > cap) { n = cap; MGK[k][1](n); }   // stare znaczniki (24 h od gry) i te z przyszłości nigdy nie blokują dłużej niż do najbliższej 19:00
     return now >= n; }
@@ -3014,7 +3075,7 @@
         v: SAVE_V, t: Date.now(), coins: devMode && devReal ? devReal.coins : coins, gems: devMode && devReal ? devReal.gems : gems, pLevel: pLevel, pExp: pExp, tapsLeft: tapsLeft, boxCount: boxCount, openCount: devMode && devReal ? devReal.open : openCount,
         cells: devSaveCells(),
         discovered: devMode && devReal && devReal.disc ? devReal.disc : discovered, owned: devMode && devReal && devReal.disc ? devReal.owned : owned, names: devMode && devReal && devReal.disc ? devRealNames() : names, hiddenAcc: devMode && devReal && devReal.disc ? devRealHidden() : hiddenAcc, secretOwn: devMode && devReal && devReal.sec ? devReal.sec.own : secretOwn, secretShow: devMode && devReal && devReal.sec ? devReal.sec.show : secretShow, taskDone: taskDone, secretReady: secretReady,
-        decorOwn: decorOwn, bg: decorSel.bg, shelfStyle: shelfStyle.slice(0, NSLOTS), decorDefault: decorDefault, memNext: memNext, mazeNext: mazeNext, peelNext: peelNext, m3Next: m3Next, fnNext: fnNext, toys: toysOwned, toyBuyAt: toyBuyAt,
+        decorOwn: decorOwn, bg: decorSel.bg, shelfStyle: shelfStyle.slice(0, NSLOTS), decorDefault: decorDefault, memNext: memNext, mazeNext: mazeNext, peelNext: peelNext, m3Next: m3Next, fnNext: fnNext, danceNext: danceNext, toys: toysOwned, toyBuyAt: toyBuyAt,
         adv: advSlots.map(function (a) { var rd = devMode ? (a.ready && Date.now() >= a.endsAt) : a.ready; return { tier: a.tier, startedAt: a.startedAt, endsAt: a.endsAt, catLevel: a.catLevel, bubUsed: !!a.bubUsed, story: a.story || null, ready: rd, notified: devMode ? (a.notified && rd) : a.notified }; })
       };
       window.localStorage.setItem(SAVE_KEY, JSON.stringify(d)); CLOUD.dirty = true; return true;
@@ -3042,44 +3103,47 @@
     decorSel.bg = DEC.bg[d.bg] ? d.bg : 0;
     function okStyle(st) { st = obj(st); return { shelf: DEC.shelf[st.shelf] ? st.shelf : 0, seat: DEC.seat[st.seat] ? st.seat : 0, post: DEC.post[st.post] ? st.post : 0 }; }
     decorDefault = okStyle(d.decorDefault); shelfStyle = []; for (var i = 0; i < NSLOTS; i++) shelfStyle[i] = Array.isArray(d.shelfStyle) && d.shelfStyle[i] ? okStyle(d.shelfStyle[i]) : null;
-    memNext = num(d.memNext, 0); mazeNext = num(d.mazeNext, 0); peelNext = num(d.peelNext, 0); m3Next = num(d.m3Next, 0); fnNext = num(d.fnNext, 0); toysOwned = {}; TOYS.forEach(function (t) { if (d.toys && d.toys[t.id]) toysOwned[t.id] = true; }); toyBuyAt = num(d.toyBuyAt, 0);
+    memNext = num(d.memNext, 0); mazeNext = num(d.mazeNext, 0); peelNext = num(d.peelNext, 0); m3Next = num(d.m3Next, 0); fnNext = num(d.fnNext, 0); danceNext = num(d.danceNext, 0); toysOwned = {}; TOYS.forEach(function (t) { if (d.toys && d.toys[t.id]) toysOwned[t.id] = true; }); toyBuyAt = num(d.toyBuyAt, 0);
   }
   window.addEventListener('pagehide', function () { saveGame(); cloudPush(true); });
   document.addEventListener('visibilitychange', function () { if (document.hidden) { saveGame(); cloudPush(true); } else cloudCheck(null); });   // po powrocie do gry: czy na innym telefonie nie ma nowszego zapisu
   // ================= Etap 8: Minigry (limit 24 h) =================
   function renderMg(s) {
-    mgObjs.forEach(killDestroy); mgObjs = []; H.mgTimers = []; H.mgSig = memReady() + '|' + mazeReady() + '|' + peelReady() + '|' + m3Ready() + '|' + fnReady();
+    mgObjs.forEach(killDestroy); mgObjs = []; H.mgTimers = []; H.mgSig = memReady() + '|' + mazeReady() + '|' + peelReady() + '|' + m3Ready() + '|' + fnReady() + '|' + danceReady();
     function add(o, d) { o.setDepth(d || 1002); mgObjs.push(o); modalObjs.push(o); return o; }
     var g = add(s.add.graphics(), 1001); g.fillStyle(0xfff7fb, 1).fillRoundedRect(36, 230, 648, 760, 44); g.lineStyle(8, 0xe2c4ff, 1).strokeRoundedRect(36, 230, 648, 760, 44);
     add(txt(s, GW / 2, 295, 'Minigry', 56, '#5a3d5c'));
     var cg = add(s.add.graphics());
     function card(cx, title, ready, nextFn, reward, onPlay, preview) {   // Etap 29: trzy karty (szer. 200)
-      cg.fillStyle(0xf3e9ff, 1).fillRoundedRect(cx - 60, 350, 120, 520, 26); add(txt(s, cx, 400, title, 22, '#6a3dbf'));   // Etap 37: pięć kart (szer. 120)   // Etap 36: cztery karty (szer. 144)
+      cg.fillStyle(0xf3e9ff, 1).fillRoundedRect(cx - 50, 350, 100, 520, 24); add(txt(s, cx, 400, title, 20, '#6a3dbf'));   // Etap 47: sześć kart (szer. 100)   // Etap 37: pięć kart (szer. 120)   // Etap 36: cztery karty (szer. 144)
       preview(cx);
       if (ready) {
-        var b = add(s.add.rectangle(cx, 700, 106, 84, 0x3ecf6b).setStrokeStyle(6, 0x279a4c).setInteractive(), 1003); add(txt(s, cx, 700, 'Graj!', 32, '#ffffff'), 1004);
-        add(txt(s, cx, 805, 'Nagroda:\n' + reward + ' 💎\ncodziennie\no 19:00', 18, '#8a6f8c').setAlign('center')); b.on('pointerup', onPlay);
+        var b = add(s.add.rectangle(cx, 700, 90, 84, 0x3ecf6b).setStrokeStyle(6, 0x279a4c).setInteractive(), 1003); add(txt(s, cx, 700, 'Graj!', 28, '#ffffff'), 1004);
+        add(txt(s, cx, 805, 'Nagroda:\n' + reward + ' 💎\ncodziennie\no 19:00', 16, '#8a6f8c').setAlign('center')); b.on('pointerup', onPlay);
       } else {   // Etap 37: wyszarzony, nieklikalny przycisk + odliczanie
         add(txt(s, cx, 596, 'Następna\ngra za:', 15, '#8a6f8c').setAlign('center')); H.mgTimers.push({ t: add(txt(s, cx, 636, fmtTime(nextFn() - Date.now()), 20, '#6a3dbf')), fn: nextFn });
-        add(s.add.rectangle(cx, 700, 106, 84, 0xc9c4cf).setStrokeStyle(6, 0xa9a3b3), 1003); add(txt(s, cx, 700, 'Graj!', 32, '#efecf3'), 1004);
-        add(txt(s, cx, 805, 'Nagroda:\n' + reward + ' 💎\ncodziennie\no 19:00', 18, '#b5aebf').setAlign('center'));
+        add(s.add.rectangle(cx, 700, 90, 84, 0xc9c4cf).setStrokeStyle(6, 0xa9a3b3), 1003); add(txt(s, cx, 700, 'Graj!', 28, '#efecf3'), 1004);
+        add(txt(s, cx, 805, 'Nagroda:\n' + reward + ' 💎\ncodziennie\no 19:00', 16, '#b5aebf').setAlign('center'));
       }
     }
-    card(100, 'Memory', memReady(), function () { return memNext; }, MEM_GEMS, function () { if (!mgLock('mem')) { renderMg(s); return; } closeModal(); openMemory(s, true); }, function (cx) {
-      ['🐭', '🐟', '🧶'].forEach(function (e, i) { var x = cx - 34 + i * 34; cg.fillStyle(0xffffff, 1).fillRoundedRect(x - 15, 484, 30, 62, 8); cg.lineStyle(3, 0xffc4dd, 1).strokeRoundedRect(x - 15, 484, 30, 62, 8); add(txt(s, x, 516, e, 20, '#000000')); });
+    card(95, 'Memory', memReady(), function () { return memNext; }, MEM_GEMS, function () { if (!mgLock('mem')) { renderMg(s); return; } closeModal(); openMemory(s, true); }, function (cx) {
+      ['🐭', '🐟', '🧶'].forEach(function (e, i) { var x = cx - 30 + i * 30; cg.fillStyle(0xffffff, 1).fillRoundedRect(x - 13, 484, 26, 62, 8); cg.lineStyle(3, 0xffc4dd, 1).strokeRoundedRect(x - 13, 484, 26, 62, 8); add(txt(s, x, 516, e, 18, '#000000')); });
     });
-    card(228, 'Labirynt', mazeReady(), function () { return mazeNext; }, MAZE_GEMS, function () { if (!mazeReady()) { renderMg(s); return; } pickCat(s, 'Labirynt', function (c) { if (!mgLock('maze')) { openMinigames(s); return; } openMaze(s, true, c); }, function () { openMinigames(s); }); }, function (cx) {
-      cg.fillStyle(0xffffff, 1).fillRoundedRect(cx - 52, 478, 104, 84, 14); cg.lineStyle(3, 0xffc4dd, 1).strokeRoundedRect(cx - 52, 478, 104, 84, 14);
-      add(txt(s, cx - 30, 520, '🐱', 26, '#000000')); add(txt(s, cx + 30, 520, '🥣', 26, '#000000')); for (var q = 0; q < 3; q++) cg.fillStyle(0xffa6c1, 1).fillCircle(cx - 8 + q * 8, 520, 3);
+    card(201, 'Labirynt', mazeReady(), function () { return mazeNext; }, MAZE_GEMS, function () { if (!mazeReady()) { renderMg(s); return; } pickCat(s, 'Labirynt', function (c) { if (!mgLock('maze')) { openMinigames(s); return; } openMaze(s, true, c); }, function () { openMinigames(s); }); }, function (cx) {
+      cg.fillStyle(0xffffff, 1).fillRoundedRect(cx - 45, 478, 90, 84, 14); cg.lineStyle(3, 0xffc4dd, 1).strokeRoundedRect(cx - 45, 478, 90, 84, 14);
+      add(txt(s, cx - 27, 520, '🐱', 24, '#000000')); add(txt(s, cx + 27, 520, '🥣', 24, '#000000')); for (var q = 0; q < 3; q++) cg.fillStyle(0xffa6c1, 1).fillCircle(cx - 8 + q * 8, 520, 3);
     });
-    card(356, 'Warstwy', peelReady(), function () { return peelNext; }, PEEL_GEMS, function () { if (!mgLock('peel')) { renderMg(s); return; } closeModal(); openPeel(s, true); }, function (cx) {   // podgląd: mini-obrazek z zewnętrzną warstwą zdjętą
-      var pc = [0xff6b6b, 0xffc93c, 0x5ccf6b, 0x4aa8ff]; for (var yy = 0; yy < 4; yy++) for (var xx = 0; xx < 4; xx++) { var rr = Math.min(xx, yy, 3 - xx, 3 - yy); if (rr === 0 && (xx + yy) % 2 === 0) continue; cg.fillStyle(pc[rr], 1).fillRoundedRect(cx - 44 + xx * 23, 480 + yy * 23, 21, 21, 5); }
+    card(307, 'Warstwy', peelReady(), function () { return peelNext; }, PEEL_GEMS, function () { if (!mgLock('peel')) { renderMg(s); return; } closeModal(); openPeel(s, true); }, function (cx) {   // podgląd: mini-obrazek z zewnętrzną warstwą zdjętą
+      var pc = [0xff6b6b, 0xffc93c, 0x5ccf6b, 0x4aa8ff]; for (var yy = 0; yy < 4; yy++) for (var xx = 0; xx < 4; xx++) { var rr = Math.min(xx, yy, 3 - xx, 3 - yy); if (rr === 0 && (xx + yy) % 2 === 0) continue; cg.fillStyle(pc[rr], 1).fillRoundedRect(cx - 43 + xx * 22, 480 + yy * 22, 20, 20, 5); }
     });
-    card(484, 'Match 3', m3Ready(), function () { return m3Next; }, M3_GEMS, function () { if (!mgLock('m3')) { renderMg(s); return; } closeModal(); openMatch3(s, true); }, function (cx) {
-      for (var yy = 0; yy < 3; yy++) for (var xx = 0; xx < 3; xx++) { cg.fillStyle(M3_COL[(xx * 2 + yy) % 5], 1).fillRoundedRect(cx - 44 + xx * 30, 478 + yy * 30, 27, 27, 8); }
+    card(413, 'Match 3', m3Ready(), function () { return m3Next; }, M3_GEMS, function () { if (!mgLock('m3')) { renderMg(s); return; } closeModal(); openMatch3(s, true); }, function (cx) {
+      for (var yy = 0; yy < 3; yy++) for (var xx = 0; xx < 3; xx++) { cg.fillStyle(M3_COL[(xx * 2 + yy) % 5], 1).fillRoundedRect(cx - 43 + xx * 29, 478 + yy * 29, 26, 26, 8); }
     });
-    card(612, 'Owoce', fnReady(), function () { return fnNext; }, FN_GEMS, function () { if (!mgLock('fn')) { renderMg(s); return; } closeModal(); openFruit(s, true); }, function (cx) {
-      ['🍉', '🍊'].forEach(function (e, i) { add(txt(s, cx - 22 + i * 44, 505 + i * 22, e, 40, '#000000')); }); cg.lineStyle(5, 0x6a3dbf, 1).lineBetween(cx - 46, 560, cx + 46, 470);
+    card(519, 'Owoce', fnReady(), function () { return fnNext; }, FN_GEMS, function () { if (!mgLock('fn')) { renderMg(s); return; } closeModal(); openFruit(s, true); }, function (cx) {
+      ['🍉', '🍊'].forEach(function (e, i) { add(txt(s, cx - 20 + i * 40, 505 + i * 22, e, 36, '#000000')); }); cg.lineStyle(5, 0x6a3dbf, 1).lineBetween(cx - 42, 560, cx + 42, 470);
+    });
+    card(625, 'Taniec', danceReady(), function () { return danceNext; }, DANCE_GEMS, function () { if (!danceReady()) { renderMg(s); return; } pickCat(s, 'Koci taniec', function (c) { if (!mgLock('dance')) { openMinigames(s); return; } openDance(s, true, c); }, function () { openMinigames(s); }); }, function (cx) {   // Etap 47
+      cg.lineStyle(5, 0xff9cc6, 1).strokeCircle(cx - 20, 525, 22); add(txt(s, cx - 20, 525, '🐾', 22, '#000000')); add(txt(s, cx + 24, 500, '♪', 34, '#b36bff')); add(txt(s, cx + 30, 548, '♫', 28, '#ff5a9a'));
     });
     var cl = add(s.add.rectangle(GW / 2, 930, 280, 70, 0xff8fa3).setStrokeStyle(6, 0xd4627b).setInteractive(), 1003); add(txt(s, GW / 2, 930, 'Zamknij', 36, '#ffffff'), 1004); cl.on('pointerup', closeModal);
   }
@@ -3702,7 +3766,7 @@
     if (muted) return;
     try { AUC = AUC || new (window.AudioContext || window.webkitAudioContext)(); if (AUC.state === 'suspended') AUC.resume();
       var t = AUC.currentTime + (at || 0), o = AUC.createOscillator(), g = AUC.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.1, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g); g.connect(AUC.destination); o.start(t); o.stop(t + dur + 0.03); } catch (e) { }
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.1, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g); g.connect(H.musicBus || AUC.destination); o.start(t); o.stop(t + dur + 0.03); } catch (e) { }
   }
   function arp(notes, step, dur, type, vol) { notes.forEach(function (f, i) { tone(f, i * step, dur, type, vol); }); }
   var SFX = {
@@ -3738,7 +3802,7 @@
       var src = AUC.createBufferSource(), fl = AUC.createBiquadFilter(), g = AUC.createGain(), t = AUC.currentTime + (at || 0); src.buffer = b; fl.type = 'bandpass'; fl.Q.value = 1.2;
       fl.frequency.setValueAtTime(f1 || 1000, t); if (f2) fl.frequency.exponentialRampToValueAtTime(f2, t + dur);
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.1, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      src.connect(fl); fl.connect(g); g.connect(AUC.destination); src.start(t); src.stop(t + dur + 0.02); } catch (e) { }
+      src.connect(fl); fl.connect(g); g.connect(H.musicBus || AUC.destination); src.start(t); src.stop(t + dur + 0.02); } catch (e) { }
   }
   function sfx(n, p) { if (!muted && SFX[n]) SFX[n](p); }
   function setMuted(v) { muted = !!v; try { if (muted) window.localStorage.setItem(MUTE_KEY, '1'); else window.localStorage.removeItem(MUTE_KEY); } catch (e) { } if (!muted) sfx('equip'); }
@@ -4142,7 +4206,7 @@
         for (var q = 0; q < openCount; q++) { discover(1 + q % 4); addCat(s, 1 + q % 4, q, false); }
         s.time.addEvent({ delay: 2600, loop: true, callback: function () { if (openCount >= NSLOTS) return; addExp(s, need(), 360, 700); var n = openCount - 1; if (!cells[n]) { var lv = 1 + (n * 7) % 4; discover(lv); addCat(s, lv, n, true); } } });
       }
-      if (/[?&]debug=1/.test(window.location.search)) window.__cc = { startConcert: startConcert, pickCat: pickCat, openMinigames: openMinigames, H: H, cells: cells, SX: SX, SY: SY, openCount: function () { return openCount; }, addExp: addExp, need: need, addCat: addCat, discover: discover, spawnBalloon: spawnBalloon, revealBall: revealBall, openMemory: openMemory, openMap: openMap, openAlbum: openAlbum, openShop: openShop, popBalloon: popBalloon, setGems: function (n) { gems = n; updateHUD(); }, openShelf: openShelf, fitCam: fitCam, getState: function () { return { gems: gems, coins: coins, pLevel: pLevel }; } };
+      if (/[?&]debug=1/.test(window.location.search)) window.__cc = { openDance: openDance, DNget: function () { return DN; }, startConcert: startConcert, pickCat: pickCat, openMinigames: openMinigames, H: H, cells: cells, SX: SX, SY: SY, openCount: function () { return openCount; }, addExp: addExp, need: need, addCat: addCat, discover: discover, spawnBalloon: spawnBalloon, revealBall: revealBall, openMemory: openMemory, openMap: openMap, openAlbum: openAlbum, openShop: openShop, popBalloon: popBalloon, setGems: function (n) { gems = n; updateHUD(); }, openShelf: openShelf, fitCam: fitCam, getState: function () { return { gems: gems, coins: coins, pLevel: pLevel }; } };
     }
   });
 
