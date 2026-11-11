@@ -136,9 +136,10 @@
   };
   // ======================================================================================
   var GW = 720, GH = 1280, K = 0.8075, FEET = 88, FLOOR_Y = 1010, SCR_FLOOR = 900, ZMAX = 0.65, ZMAX_B = 0.85, HUD_BOTTOM = 150;   // Etap 13: podstawa drapaka na ekranie y=900, bazowa skala świata 65% (-35%)
-  var START_COINS = 30, START_GEMS = 10, DUP_REFUND = 25, EXP_PER_MERGE = 10, START_SLOTS = 9, MAX_LEVEL = 36, TAPS_PER_BOX = 3, GOLD_EVERY = 30, GEM_LEVELUP = 25, GEM_MERGE_CHANCE = 0.25;
+  var START_COINS = 30, START_GEMS = 10, DUP_REFUND = 25, EXP_PER_MERGE = 10, START_SLOTS = 9, MAX_LEVEL = 40, TAPS_PER_BOX = 3, GOLD_EVERY = 30, GEM_LEVELUP = 25, GEM_MERGE_CHANCE = 0.25;
   var INCOME = [1, 3, 8, 15, 28, 50, 90, 160, 280, 480, 800, 1300, 2100, 3400, 5400, 8600, 13000, 20000, 30000, 45000, 68000, 100000, 150000, 230000,
-    350000, 530000, 800000, 1200000, 1800000, 2700000, 4000000, 6000000, 9000000, 13500000, 20000000, 30000000];   // 36 poziomów (25–36 = strona 3 „Bohaterowie”)
+    350000, 530000, 800000, 1200000, 1800000, 2700000, 4000000, 6000000, 9000000, 13500000, 20000000, 30000000,
+    45000000, 68000000, 100000000, 150000000];   // 40 poziomów (25–36 = strona 3 „Bohaterowie”, 37–40 = strona 4)
   // Siatka półek (kolumna, rząd). Pierwsze 9 = start 3x3; kolejne dodawane po 1 na każdy Level Up (pozycje istniejących nigdy się nie zmieniają)
   var CELLS = [[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1],[-1,2],[0,2],[1,2],
                [-1,3],[0,3],[1,3],
@@ -156,7 +157,7 @@
   // ======================================================================================
   var WEEKLY_TASKS = {
     title: 'Zadania Tygodnia',
-    secretRewardLevels: [1, 2, 3, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+    secretRewardLevels: [1, 2, 3, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
     tasks: [
       { id: 'toys', icon: '🧸', name: 'Posprzątaj zabawki' },
       { id: 'veg', icon: '🥦', name: 'Zjedz warzywa' },
@@ -472,6 +473,106 @@
     }
   };
   // ======================================================================================
+  // Etap 44: KOTY 37–40 (Pirat, Księżniczka, Wąsaty Skoczek, Łowca Nagród) + formy specjalne. Arkusze z zielonym tłem wycięte w nc4/ (key.py, build_new.py):
+  //   układ jak Teddy (głowa z oczami + głowa z zamkniętymi oczami, tułów, ogon); ubranka wycięte z dolnego rzędu (różnica względem kota bez ubranek), ikony = kule.
+  //   Forma specjalna podmienia tylko części kota (arkusz catNs_sheet.png); ubranka te same.
+  const CAT37_SHEET_CONFIG = {
+    file: 'cat37_sheet.png', gs: 0.48,
+    eyesOpen: [], eyesClosed: ['headClosed'], top: [],
+    parts: {
+      tail: { crop: { x: 774, y: 61, w: 120, h: 193 }, scale: 0.668, offset: { x: -116.0, y: -74.5 }, pivot: { x: 0.72, y: 0.95 } },
+      body: { crop: { x: 800, y: 304, w: 151, h: 116 }, scale: 1.217, offset: { x: 1.5, y: -70.6 } },
+      head: { crop: { x: 389, y: 240, w: 202, h: 209 }, scale: 1.232, offset: { x: 0.9, y: -210.9 } },
+      headClosed: { crop: { x: 594, y: 241, w: 201, h: 208 }, scale: 1.232, offset: { x: 0.3, y: -210.3 } }
+    },
+    acc: {
+      bandana: { layer: 'head', crop: { x: 10, y: 1440, w: 208, h: 212 }, cropIcon: { x: 10, y: 1210, w: 210, h: 210 }, scale: 1.2198, offset: { x: -15.0, y: -226.8 } },
+      bottle: { layer: 'head', crop: { x: 226, y: 1440, w: 149, h: 127 }, cropIcon: { x: 225, y: 1210, w: 210, h: 210 }, scale: 1.2198, offset: { x: 10.0, y: -74.9 } },
+      patch: { layer: 'head', crop: { x: 383, y: 1440, w: 136, h: 151 }, cropIcon: { x: 440, y: 1210, w: 210, h: 210 }, scale: 1.2198, offset: { x: 37.5, y: -261.5 } },
+      braids: { layer: 'head', crop: { x: 527, y: 1440, w: 213, h: 192 }, cropIcon: { x: 655, y: 1210, w: 210, h: 210 }, scale: 1.2198, offset: { x: 1.5, y: -168.2 } },
+      compass: { layer: 'head', crop: { x: 748, y: 1440, w: 180, h: 120 }, cropIcon: { x: 870, y: 1210, w: 210, h: 210 }, scale: 1.2198, offset: { x: -16.2, y: -79.2 } },
+      hat: { layer: 'head', crop: { x: 936, y: 1440, w: 254, h: 148 }, cropIcon: { x: 1085, y: 1210, w: 210, h: 210 }, scale: 1.2198, offset: { x: 7.0, y: -309.7 } }
+    },
+    sr: { file: 'cat37s_sheet.png', parts: {
+        tail: { crop: { x: 771, y: 57, w: 127, h: 199 }, scale: 0.668, offset: { x: -123.8, y: -76.5 }, pivot: { x: 0.72, y: 0.95 } },
+        body: { crop: { x: 797, y: 302, w: 160, h: 120 }, scale: 1.217, offset: { x: 3.4, y: -73.0 } },
+        head: { crop: { x: 390, y: 240, w: 204, h: 208 }, scale: 1.232, offset: { x: 3.5, y: -215.2 } },
+        headClosed: { crop: { x: 596, y: 239, w: 203, h: 209 }, scale: 1.232, offset: { x: 5.3, y: -214.6 } }
+      } }
+  };
+  const CAT38_SHEET_CONFIG = {
+    file: 'cat38_sheet.png', gs: 0.48,
+    eyesOpen: [], eyesClosed: ['headClosed'], top: [],
+    parts: {
+      tail: { crop: { x: 768, y: 65, w: 126, h: 187 }, scale: 0.668, offset: { x: -123.4, y: -72.5 }, pivot: { x: 0.72, y: 0.95 } },
+      body: { crop: { x: 797, y: 299, w: 160, h: 131 }, scale: 1.217, offset: { x: 2.7, y: -79.7 } },
+      head: { crop: { x: 386, y: 241, w: 208, h: 211 }, scale: 1.232, offset: { x: 0.9, y: -230.4 } },
+      headClosed: { crop: { x: 594, y: 243, w: 206, h: 209 }, scale: 1.232, offset: { x: 3.4, y: -227.9 } }
+    },
+    acc: {
+      gloves: { layer: 'head', crop: { x: 10, y: 1440, w: 121, h: 51 }, cropIcon: { x: 10, y: 1210, w: 210, h: 210 }, scale: 1.3106, offset: { x: -1.1, y: -72.5 } },
+      earrings: { layer: 'head', crop: { x: 139, y: 1440, w: 179, h: 212 }, cropIcon: { x: 225, y: 1210, w: 210, h: 210 }, scale: 1.3106, offset: { x: 4.2, y: -237.0 } },
+      peach: { layer: 'head', crop: { x: 326, y: 1440, w: 158, h: 125 }, cropIcon: { x: 440, y: 1210, w: 210, h: 210 }, scale: 1.3106, offset: { x: 14.0, y: -84.3 } },
+      umbrella: { layer: 'head', crop: { x: 492, y: 1440, w: 196, h: 203 }, cropIcon: { x: 655, y: 1210, w: 210, h: 210 }, scale: 1.3106, offset: { x: 48.1, y: -275.6 } },
+      dress: { layer: 'head', crop: { x: 696, y: 1440, w: 214, h: 127 }, cropIcon: { x: 870, y: 1210, w: 210, h: 210 }, scale: 1.3106, offset: { x: 0.9, y: -81.6 } },
+      crown: { layer: 'head', crop: { x: 918, y: 1440, w: 121, h: 79 }, cropIcon: { x: 1085, y: 1210, w: 210, h: 210 }, scale: 1.3106, offset: { x: 13.4, y: -358.2 } }
+    },
+    sr: { file: 'cat38s_sheet.png', parts: {
+        tail: { crop: { x: 768, y: 65, w: 127, h: 187 }, scale: 0.668, offset: { x: -123.8, y: -72.5 }, pivot: { x: 0.72, y: 0.95 } },
+        body: { crop: { x: 797, y: 299, w: 160, h: 131 }, scale: 1.217, offset: { x: 3.9, y: -79.7 } },
+        head: { crop: { x: 386, y: 226, w: 208, h: 226 }, scale: 1.232, offset: { x: 1.0, y: -239.6 } },
+        headClosed: { crop: { x: 594, y: 242, w: 206, h: 210 }, scale: 1.232, offset: { x: 3.5, y: -228.5 } }
+      } }
+  };
+  const CAT39_SHEET_CONFIG = {
+    file: 'cat39_sheet.png', gs: 0.48,
+    eyesOpen: [], eyesClosed: ['headClosed'], top: [],
+    parts: {
+      tail: { crop: { x: 769, y: 68, w: 128, h: 196 }, scale: 0.668, offset: { x: -124.1, y: -75.5 }, pivot: { x: 0.72, y: 0.95 } },
+      body: { crop: { x: 797, y: 304, w: 160, h: 118 }, scale: 1.217, offset: { x: 2.9, y: -71.8 } },
+      head: { crop: { x: 387, y: 242, w: 205, h: 213 }, scale: 1.232, offset: { x: 1.1, y: -215.8 } },
+      headClosed: { crop: { x: 595, y: 242, w: 204, h: 213 }, scale: 1.232, offset: { x: 2.9, y: -215.8 } }
+    },
+    acc: {
+      cap: { layer: 'head', crop: { x: 1306, y: 1196, w: 2, h: 2 }, cropIcon: { x: 10, y: 1210, w: 210, h: 210 }, scale: 1, offset: { x: 0, y: -100 } },
+      gloves: { layer: 'head', crop: { x: 10, y: 1440, w: 131, h: 123 }, cropIcon: { x: 225, y: 1210, w: 210, h: 210 }, scale: 1.2833, offset: { x: 13.3, y: -58.6 } },
+      overalls: { layer: 'head', crop: { x: 149, y: 1440, w: 133, h: 101 }, cropIcon: { x: 440, y: 1210, w: 210, h: 210 }, scale: 1.2833, offset: { x: 12.0, y: -80.4 } },
+      mushroom: { layer: 'head', crop: { x: 290, y: 1440, w: 151, h: 137 }, cropIcon: { x: 655, y: 1210, w: 210, h: 210 }, scale: 1.2833, offset: { x: 10.7, y: -67.6 } },
+      flower: { layer: 'head', crop: { x: 449, y: 1440, w: 151, h: 140 }, cropIcon: { x: 870, y: 1210, w: 210, h: 210 }, scale: 1.2833, offset: { x: 9.4, y: -65.6 } },
+      star: { layer: 'head', crop: { x: 608, y: 1440, w: 154, h: 137 }, cropIcon: { x: 1085, y: 1210, w: 210, h: 210 }, scale: 1.2833, offset: { x: 13.9, y: -67.6 } }
+    },
+    sr: { file: 'cat39s_sheet.png', parts: {
+        tail: { crop: { x: 768, y: 69, w: 128, h: 189 }, scale: 0.668, offset: { x: -122.9, y: -73.1 }, pivot: { x: 0.72, y: 0.95 } },
+        body: { crop: { x: 799, y: 300, w: 158, h: 128 }, scale: 1.217, offset: { x: 5.0, y: -77.9 } },
+        head: { crop: { x: 386, y: 237, w: 202, h: 219 }, scale: 1.232, offset: { x: 2.1, y: -231.7 } },
+        headClosed: { crop: { x: 595, y: 238, w: 202, h: 219 }, scale: 1.232, offset: { x: 3.3, y: -231.7 } }
+      } }
+  };
+  const CAT40_SHEET_CONFIG = {
+    file: 'cat40_sheet.png', gs: 0.48,
+    eyesOpen: [], eyesClosed: ['headClosed'], top: [],
+    parts: {
+      tail: { crop: { x: 786, y: 60, w: 112, h: 201 }, scale: 0.668, offset: { x: -118.8, y: -77.1 }, pivot: { x: 0.72, y: 0.95 } },
+      body: { crop: { x: 797, y: 303, w: 160, h: 119 }, scale: 1.217, offset: { x: 2.3, y: -72.4 } },
+      head: { crop: { x: 393, y: 243, w: 200, h: 209 }, scale: 1.232, offset: { x: 2.2, y: -214.6 } },
+      headClosed: { crop: { x: 600, y: 243, w: 200, h: 209 }, scale: 1.232, offset: { x: 1.0, y: -213.4 } }
+    },
+    acc: {
+      plate: { layer: 'head', crop: { x: 10, y: 1440, w: 195, h: 293 }, cropIcon: { x: 10, y: 1210, w: 210, h: 210 }, scale: 1.3319, offset: { x: 12.2, y: -144.7 } },
+      armor: { layer: 'head', crop: { x: 262, y: 537, w: 241, h: 179 }, cropIcon: { x: 225, y: 1210, w: 210, h: 210 }, scale: 0.7975, offset: { x: 2.2, y: -121.9 } },
+      cape: { layer: 'head', crop: { x: 213, y: 1440, w: 224, h: 138 }, cropIcon: { x: 440, y: 1210, w: 210, h: 210 }, scale: 1.3319, offset: { x: -1.8, y: -41.5 } },
+      rifle: { layer: 'head', crop: { x: 445, y: 1440, w: 191, h: 143 }, cropIcon: { x: 655, y: 1210, w: 210, h: 210 }, scale: 1.3319, offset: { x: 33.5, y: -44.8 } },
+      jetpack: { layer: 'head', crop: { x: 644, y: 1440, w: 222, h: 297 }, cropIcon: { x: 870, y: 1210, w: 210, h: 210 }, scale: 1.3319, offset: { x: 24.8, y: -147.3 } },
+      helmet: { layer: 'head', crop: { x: 874, y: 1440, w: 194, h: 200 }, cropIcon: { x: 1085, y: 1210, w: 210, h: 210 }, scale: 1.3319, offset: { x: 12.9, y: -239.9 } }
+    },
+    sr: { file: 'cat40s_sheet.png', parts: {
+        tail: { crop: { x: 774, y: 63, w: 122, h: 199 }, scale: 0.668, offset: { x: -122.1, y: -76.5 }, pivot: { x: 0.72, y: 0.95 } },
+        body: { crop: { x: 797, y: 299, w: 160, h: 126 }, scale: 1.217, offset: { x: 1.6, y: -76.7 } },
+        head: { crop: { x: 386, y: 243, w: 204, h: 215 }, scale: 1.232, offset: { x: 3.3, y: -226.8 } },
+        headClosed: { crop: { x: 596, y: 241, w: 203, h: 207 }, scale: 1.232, offset: { x: 7.6, y: -231.7 } }
+      } }
+  };
+  // ======================================================================================
   // ETAP 16: GENERYCZNY SYSTEM AKCESORIÓW (motywy 4–24). Przedmiot = [nazwa, kształt, kolor1, kolor2, strona?].
   // KOLOR PRZEDMIOTU JEST ZAPISANY W JEGO DEFINICJI (wałek brązowy, patelnia szara…) – Tier (Zwykły/Rzadki/Epicki/Legendarny)
   // to wyłącznie RZADKOŚĆ: slot 0,1 = Zwykły, 2,3 = Rzadki, 4 = Epicki, 5 = Legendarny (pokazywana poświatą/ramką, nigdy kolorem SVG).
@@ -599,15 +700,44 @@
     { n: 'Peleryna wampira', a: 'pelerynę wampira', g: 'f', png: true, sheet: 'cape' },
     { n: 'Nietoperek', a: 'nietoperka', g: 'ma', png: true, sheet: 'bat' },
     { n: 'Latarnia z nietoperzami', a: 'latarnię z nietoperzami', g: 'f', png: true, sheet: 'lantern' }] };
+  THEMES[37] = { name: 'Pirat', items: [
+    { n: 'Czerwona bandana', a: 'czerwoną bandanę', g: 'f', png: true, sheet: 'bandana' },
+    { n: 'Butelka z miksturą', a: 'butelkę z miksturą', g: 'f', png: true, sheet: 'bottle' },
+    { n: 'Opaska na oko', a: 'opaskę na oko', g: 'f', png: true, sheet: 'patch' },
+    { n: 'Warkoczyki z koralikami', a: 'warkoczyki z koralikami', g: 'p', png: true, sheet: 'braids' },
+    { n: 'Złoty kompas', a: 'złoty kompas', g: 'm', png: true, sheet: 'compass' },
+    { n: 'Piracki kapelusz', a: 'piracki kapelusz', g: 'm', png: true, sheet: 'hat' }] };
+  THEMES[38] = { name: 'Księżniczka', items: [
+    { n: 'Białe rękawiczki', a: 'białe rękawiczki', g: 'p', png: true, sheet: 'gloves' },
+    { n: 'Kolczyki', a: 'kolczyki', g: 'p', png: true, sheet: 'earrings' },
+    { n: 'Brzoskwinka', a: 'brzoskwinkę', g: 'f', png: true, sheet: 'peach' },
+    { n: 'Różowa parasolka', a: 'różową parasolkę', g: 'f', png: true, sheet: 'umbrella' },
+    { n: 'Różowa suknia', a: 'różową suknię', g: 'f', png: true, sheet: 'dress' },
+    { n: 'Złota korona', a: 'złotą koronę', g: 'f', png: true, sheet: 'crown' }] };
+  THEMES[39] = { name: 'Wąsaty Skoczek', items: [
+    { n: 'Czapka z literą M', a: 'czapkę z literą M', g: 'f', png: true, sheet: 'cap' },
+    { n: 'Białe rękawiczki', a: 'białe rękawiczki', g: 'p', png: true, sheet: 'gloves' },
+    { n: 'Niebieskie ogrodniczki', a: 'niebieskie ogrodniczki', g: 'p', png: true, sheet: 'overalls' },
+    { n: 'Grzybek', a: 'grzybek', g: 'm', png: true, sheet: 'mushroom' },
+    { n: 'Ognisty kwiatek', a: 'ognisty kwiatek', g: 'm', png: true, sheet: 'flower' },
+    { n: 'Gwiazdka', a: 'gwiazdkę', g: 'f', png: true, sheet: 'star' }] };
+  THEMES[40] = { name: 'Łowca Nagród', items: [
+    { n: 'Tabliczka z herbem', a: 'tabliczkę z herbem', g: 'f', png: true, sheet: 'plate' },
+    { n: 'Zbroja', a: 'zbroję', g: 'f', png: true, sheet: 'armor' },
+    { n: 'Peleryna', a: 'pelerynę', g: 'f', png: true, sheet: 'cape' },
+    { n: 'Blaster', a: 'blaster', g: 'm', png: true, sheet: 'rifle' },
+    { n: 'Plecak odrzutowy', a: 'plecak odrzutowy', g: 'm', png: true, sheet: 'jetpack' },
+    { n: 'Hełm łowcy', a: 'hełm łowcy', g: 'm', png: true, sheet: 'helmet' }] };
   function themeOf(lvl) { return THEMES[lvl] || THEME_CLASSIC; }
   function itemOf(lvl, slot) { return themeOf(lvl).items[slot]; }
   Object.keys(THEMES).forEach(function (L) { THEMES[L].items.forEach(function (it, i) { if (!it.png) it.key = 'th' + L + '_' + i; it.ang = it.ang || 0; }); });
   // ===== SECRET RARE: pełna zamiana wyglądu kota danego poziomu (nagroda za Zadania Tygodnia) =====
   var SECRET = { 1: { name: 'Tęczowy Jednorożec' }, 3: { name: 'Holograficzna Syjamka' }, 9: { name: 'Różowe Serduszko' } };
+  SECRET[37] = { name: 'Pirat Kosteczka' }; SECRET[38] = { name: 'Lodowa Księżniczka' }; SECRET[39] = { name: 'Złoty Skoczek' }; SECRET[40] = { name: 'Niebieski Łowca' };   // Etap 44
   var TIERS = [
     {col:0xcfcfe0,p:50,slots:[0,1],f:'Białą',pl:'Białe',name:'Zwykły'}, {col:0x3ecf6b,p:30,slots:[2,3],f:'Zieloną',pl:'Zielone',name:'Rzadki'},
     {col:0x3a9bff,p:15,slots:[4],f:'Niebieską',pl:'Niebieskie',name:'Epicki'}, {col:0xffc400,p:5,slots:[5],f:'Złotą',pl:'Złote',name:'Legendarny'}];
-  var NAME_POOL = ['Puszek', 'Łatek', 'Mruczek', 'Kłębek', 'Śnieżka', 'Filemon', 'Bursztyn', 'Pazurek', 'Mgiełka', 'Ciapek', 'Wąsik', 'Gizmo', 'Kropka', 'Rudy', 'Cukier', 'Bąbel', 'Mizia', 'Szarotka', 'Tygrys', 'Perełka', 'Fąfel', 'Karmel', 'Pimpek', 'Iskierka', 'Nutka', 'Lukier', 'Zefirek', 'Ogonek', 'Kotlet', 'Brzoskwinka', 'Figa', 'Pączek', 'Gwiazdka', 'Kminek', 'Bajka', 'Psotka', 'Rogalik', 'Chmurka', 'Migdał', 'Truskawka', 'Hultaj', 'Pianka', 'Żelek', 'Malina'];   // 44 imiona na 36 kotów
+  var NAME_POOL = ['Puszek', 'Łatek', 'Mruczek', 'Kłębek', 'Śnieżka', 'Filemon', 'Bursztyn', 'Pazurek', 'Mgiełka', 'Ciapek', 'Wąsik', 'Gizmo', 'Kropka', 'Rudy', 'Cukier', 'Bąbel', 'Mizia', 'Szarotka', 'Tygrys', 'Perełka', 'Fąfel', 'Karmel', 'Pimpek', 'Iskierka', 'Nutka', 'Lukier', 'Zefirek', 'Ogonek', 'Kotlet', 'Brzoskwinka', 'Figa', 'Pączek', 'Gwiazdka', 'Kminek', 'Bajka', 'Psotka', 'Rogalik', 'Chmurka', 'Migdał', 'Truskawka', 'Hultaj', 'Pianka', 'Żelek', 'Malina', 'Bosman', 'Różyczka', 'Skoczek', 'Tropik'];   // 48 imion na 40 kotów
   var ADV_SPEED = Number((String(window.location.search).match(/adv=(\d+)/) || [])[1]) || 1; // ?adv=60 przyspiesza czas do testów
   // przygody: czas w godzinach, nagroda: diamenty + kule (indeksy BALLS)
   var ADV_TIERS = [
@@ -1591,7 +1721,7 @@
     return cat;
   }
   // ----- Etap 22/30: koty z arkuszy (Lvl 2, Lvl 3 + forma SUPER) – wycinanie wg CAT?_SHEET_CONFIG, bez obróbki pikseli
-  var SHEET_CATS = { 2: CAT2_SHEET_CONFIG, 3: CAT3_SHEET_CONFIG, 4: CAT4_SHEET_CONFIG, 5: CAT5_SHEET_CONFIG, 6: CAT6_SHEET_CONFIG, 7: CAT7_SHEET_CONFIG, 8: CAT8_SHEET_CONFIG, 9: CAT9_SHEET_CONFIG, 10: CAT10_SHEET_CONFIG, 11: CAT11_SHEET_CONFIG, 12: CAT12_SHEET_CONFIG }, SHEET_REFS = {};
+  var SHEET_CATS = { 2: CAT2_SHEET_CONFIG, 3: CAT3_SHEET_CONFIG, 4: CAT4_SHEET_CONFIG, 5: CAT5_SHEET_CONFIG, 6: CAT6_SHEET_CONFIG, 7: CAT7_SHEET_CONFIG, 8: CAT8_SHEET_CONFIG, 9: CAT9_SHEET_CONFIG, 10: CAT10_SHEET_CONFIG, 11: CAT11_SHEET_CONFIG, 12: CAT12_SHEET_CONFIG, 37: CAT37_SHEET_CONFIG, 38: CAT38_SHEET_CONFIG, 39: CAT39_SHEET_CONFIG, 40: CAT40_SHEET_CONFIG }, SHEET_REFS = {};
   function isSheet(l) { return !!SHEET_CATS[l]; }
   function sheetKey(f) { return f.replace(/\.png$/, ''); }
   function accDef(C, k, sec) {   // definicja akcesorium; w formie SR z nadpisaniami z C.sr.acc
@@ -3052,23 +3182,27 @@
     s.time.delayedCall(4000, function () { if (!done) { done = true; cleanup(); } });
     setTimeout(function () { if (!done) { done = true; cleanup(); H.sharing = false; } }, 6000);
   }
-  function deliverCatImage(s, blob, name) {
-    var fname = 'kotek-' + String(name).replace(/[^A-Za-z0-9ĄĆĘŁŃÓŚŹŻąćęłńóśźż]+/g, '_') + '.png', file = null, text = 'Zobacz mojego kotka ' + name + '! 🐱';
-    try { file = new File([blob], fname, { type: 'image/png' }); } catch (e) { }
-    if (file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {   // telefon: menu „Udostępnij” (WhatsApp itd.)
-      navigator.share({ files: [file], text: text, title: name }).catch(function (err) { if (err && err.name === 'AbortError') return; showCatImage(blob, fname, name); });
-      return;
-    }
-    showCatImage(blob, fname, name);
+  function deliverCatImage(s, blob, name) {   // Etap 44: zawsze najpierw okienko z obrazkiem; „Wyślij” to osobne dotknięcie (telefon pozwala udostępnić plik tylko zaraz po dotknięciu)
+    var fname = 'kotek-' + String(name).replace(/[^A-Za-z0-9ĄĆĘŁŃÓŚŹŻąćęłńóśźż]+/g, '_') + '.png';
+    showCatImage(s, blob, fname, name);
   }
-  function showCatImage(blob, fname, name) {   // plan B: okienko z obrazkiem (przytrzymaj, aby zapisać / wysłać) + Pobierz
-    var old = document.getElementById('ccShareBox'); if (old) old.remove(); var url = URL.createObjectURL(blob);
-    var box = document.createElement('div'); box.id = 'ccShareBox'; box.style.cssText = 'position:fixed;inset:0;background:rgba(40,25,60,.82);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-family:sans-serif;color:#fff;padding:12px;text-align:center';
-    box.innerHTML = '<div style="font-size:19px;font-weight:bold">Przytrzymaj obrazek, aby go zapisać lub wysłać 💌</div>';
-    var im = document.createElement('img'); im.src = url; im.style.cssText = 'max-height:68vh;max-width:92vw;border-radius:18px;box-shadow:0 6px 30px rgba(0,0,0,.5)'; box.appendChild(im);
-    var row = document.createElement('div'); row.style.cssText = 'display:flex;gap:12px';
-    var cl = document.createElement('button'); cl.textContent = 'Zamknij'; cl.style.cssText = 'background:#8f78ff;color:#fff;border:0;padding:12px 22px;border-radius:14px;font-size:20px;font-weight:bold'; cl.onclick = function () { box.remove(); };
-    row.appendChild(cl); box.appendChild(row); document.body.appendChild(box);
+  function showCatImage(s, blob, fname, name) {
+    var old = document.getElementById('ccShareBox'); if (old) old.remove(); var url = URL.createObjectURL(blob), file = null, text = 'Zobacz mojego kotka ' + name + '! 🐱';
+    try { file = new File([blob], fname, { type: 'image/png' }); } catch (e) { }
+    var canShare = false; try { canShare = !!(file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })); } catch (e) { }
+    try { s.input.enabled = false; } catch (e) { }   // gra pod spodem nie dostaje dotknięć (wcześniej „Zamknij” trafiało w „Wyślij” i obrazek otwierał się znowu)
+    var box = document.createElement('div'); box.id = 'ccShareBox'; box.style.cssText = 'position:fixed;inset:0;background:rgba(40,25,60,.88);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-family:sans-serif;color:#fff;padding:12px;text-align:center;touch-action:manipulation';
+    ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'mousedown', 'mouseup', 'click'].forEach(function (ev) { box.addEventListener(ev, function (e) { e.stopPropagation(); }); });
+    var im = document.createElement('img'); im.src = url; im.style.cssText = 'max-height:58vh;max-width:90vw;border-radius:18px;box-shadow:0 6px 30px rgba(0,0,0,.5)'; box.appendChild(im);
+    var msg = document.createElement('div'); msg.style.cssText = 'font-size:16px;max-width:92vw;opacity:.9'; msg.textContent = canShare ? 'Dotknij „Wyślij” i wybierz WhatsApp 💌' : 'Ta przeglądarka nie umie wysłać zdjęcia prosto do WhatsApp. Zapisz obrazek i wyślij go w WhatsApp jako zdjęcie (albo przytrzymaj obrazek).'; box.appendChild(msg);
+    var row = document.createElement('div'); row.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;justify-content:center';
+    function btn(t, bg, fn) { var b = document.createElement('button'); b.textContent = t; b.style.cssText = 'background:' + bg + ';color:#fff;border:0;padding:14px 20px;border-radius:14px;font-size:20px;font-weight:bold'; b.onclick = function (e) { e.preventDefault(); e.stopPropagation(); fn(); }; row.appendChild(b); return b; }
+    var closed = false;
+    function close() { if (closed) return; closed = true; box.remove(); setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) { } }, 60000); setTimeout(function () { try { s.input.enabled = true; } catch (e) { } }, 450); }
+    if (canShare) btn('📤 Wyślij', '#25c26e', function () { navigator.share({ files: [file], text: text, title: name }).then(function () { msg.textContent = 'Wysłane! 💌'; }).catch(function (err) { if (err && err.name === 'AbortError') return; msg.textContent = 'Nie udało się wysłać – zapisz obrazek i wyślij go jako zdjęcie.'; }); });
+    btn('💾 Zapisz', '#3a9bff', function () { try { var a = document.createElement('a'); a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); msg.textContent = 'Zapisano w Pobranych – w WhatsApp wybierz 📎 i to zdjęcie.'; } catch (e) { msg.textContent = 'Przytrzymaj obrazek, aby go zapisać.'; } });
+    btn('Zamknij', '#8f78ff', close);
+    box.appendChild(row); document.body.appendChild(box);
   }
   function renderAlbum(s, sel) {
     albumObjs.forEach(killDestroy); albumObjs = [];
@@ -3864,7 +3998,7 @@
   });
 
   // Etap 42b: grafiki SVG rysowane na canvas przed startem (bez XHR na blob: – nie działało w niektórych przeglądarkach)
-  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'a337d3bd';
+  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'ed1780da';
   function imgUrl(f) { return f.replace(/\.png$/, IMG_EXT) + (ASSET_V !== 'dev' ? '?v=' + ASSET_V : ''); }   // Etap 43: grafiki jako WebP (5× mniejsze), PNG gdy przeglądarka nie umie
   var PREIMG = {};
   function preImgs() {   // Etap 43: grafiki kotów pobierają się i dekodują od razu, równolegle z resztą startu (atlas, zapis online, uruchamianie Phasera)
