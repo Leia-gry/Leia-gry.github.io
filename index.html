@@ -2043,7 +2043,61 @@
     if (instant) { c.setZoom(z); anchor(c); } else { c.scrollX = CAM_CX - GW / 2; c.zoomTo(z, 1100, 'Sine.easeInOut', true, function (cam) { anchor(cam); }); }
     if (H.zoomLbl) H.zoomLbl.setText('zoom ' + z.toFixed(2) + '  półki ' + openCount);
   }
+  // ================= Etap 46: KOCI KONCERT – wszystkie kotki tańczą i śpiewają =================
+  //   Własna melodia (syntezator, bez plików) i własna choreografia. Taniec jest „skokowy” (poza zmienia się co pół taktu, bez płynnych przejść) – jak w rysunkowej animacji poklatkowej.
+  var CONCERT_CD = 25000, concertNext = 0;
+  var DANCE = [{ a: -12, y: 0, sx: 1, sy: 1 }, { a: -12, y: -16, sx: 0.95, sy: 1.07 }, { a: 12, y: 0, sx: 1, sy: 1 }, { a: 12, y: -16, sx: 0.95, sy: 1.07 },
+               { a: 0, y: 0, sx: 1.13, sy: 0.85 }, { a: 0, y: -42, sx: 0.9, sy: 1.14 }, { a: -7, y: 0, sx: 1.05, sy: 0.95 }, { a: 7, y: -9, sx: 1, sy: 1.03 }];
+  function concertMusic(B) {   // B = długość ćwierćnuty w sekundach
+    var N = { C4: 261.6, D4: 293.7, E4: 329.6, F4: 349.2, G4: 392, A4: 440, B4: 493.9, C5: 523.3, D5: 587.3, E5: 659.3, F5: 698.5, G5: 784, A5: 880, C6: 1046.5 };
+    var mel = [   // [takt (ćwierćnuty od startu), nuta, długość]
+      [4, 'E5', 1], [5, 'G5', 1], [6, 'E5', 0.5], [6.5, 'D5', 0.5], [7, 'C5', 1],
+      [8, 'D5', 1], [9, 'F5', 1], [10, 'D5', 0.5], [10.5, 'C5', 0.5], [11, 'B4', 1],
+      [12, 'C5', 0.5], [12.5, 'E5', 0.5], [13, 'G5', 1], [14, 'A5', 0.5], [14.5, 'G5', 0.5], [15, 'E5', 1],
+      [16, 'D5', 0.5], [16.5, 'E5', 0.5], [17, 'D5', 1], [18, 'C5', 2],
+      [20, 'E5', 1], [21, 'G5', 1], [22, 'E5', 0.5], [22.5, 'D5', 0.5], [23, 'C5', 1],
+      [24, 'F5', 0.5], [24.5, 'A5', 0.5], [25, 'G5', 1], [26, 'E5', 0.5], [26.5, 'G5', 0.5], [27, 'C6', 1.6]];
+    mel.forEach(function (m) { var f = N[m[1]], at = m[0] * B, d = m[2] * B * 0.92;
+      tone(f * 0.82, at, 0.07, 'triangle', 0.075, f); tone(f, at + 0.06, d, 'triangle', 0.075);   // „miau”: krótki podjazd do nuty
+      tone(f * 0.794, at + 0.06, d, 'sine', 0.03); });                                             // drugi głos (tercja niżej)
+    var bass = [130.8, 130.8, 98, 130.8, 110, 98, 130.8];   // C C G C Am G C
+    for (var b = 0; b < 28; b++) { var at = b * B;
+      tone(bass[Math.floor(b / 4)] * (b % 2 ? 1.5 : 1), at, B * 0.8, 'sine', 0.11);
+      tone(150, at, 0.11, 'sine', 0.16, 48);                                  // stopa
+      if (b % 2) noise(at, 0.09, 0.06, 1900, 900);                            // klaśnięcie
+      noise(at + B / 2, 0.03, 0.022, 7000, 6000); }                           // hi-hat
+    [523.3, 659.3, 784, 1046.5].forEach(function (f) { tone(f, 28 * B, 0.9, 'triangle', 0.05); });   // akord na koniec
+  }
+  function startConcert(s) {
+    if (H.concert || modalObjs.length || H.building) return;
+    var cats = cells.filter(function (c) { return c && c.type === 'cat'; });
+    if (Date.now() < concertNext || !cats.length) { sfx('nope'); return; }
+    H.concert = true; var B = 60 / 132, STEPS = 56, i = 0, cols = [0xff5a9a, 0xffc93a, 0x3ecf6b, 0x3a9bff, 0xb36bff];
+    concertMusic(B);
+    var light = s.add.rectangle(GW / 2, GH / 2, GW, GH, cols[0], 0.11).setDepth(15).setBlendMode(Phaser.BlendModes.ADD);
+    var notes = []; for (var n = 0; n < 8; n++) notes.push(inWorld(function () { return txt(s, 0, 0, n % 2 ? '♪' : '♫', 44, '#ffffff', '#ff5a9a').setDepth(210).setVisible(false); }));
+    cats.forEach(function (c) { s.tweens.killTweensOf(c.hopper); });
+    function pose(c, p, m) { if (!c.outer.scene || !c.hopper) return; c.hopper.setPosition(0, FEET + p.y).setScale(p.sx, p.sy).setAngle(p.a * m); }
+    function finish() {
+      cats.forEach(function (c) { if (c.outer.scene) c.hopper.setPosition(0, FEET).setScale(1).setAngle(0); });
+      light.destroy(); notes.forEach(function (t) { s.tweens.killTweensOf(t); t.destroy(); });
+      H.concert = false; concertNext = Date.now() + CONCERT_CD; confetti(s); sfx('level');
+      var g = 0; cells.forEach(function (c) { if (c && c.type === 'cat') g += INCOME[c.level - 1] * incomeMult(); }); g = Math.round(g * 20);
+      if (g > 0) { coins += g; updateHUD(); floatText(s, GW / 2, 520, 'Brawo! +' + fmt(g), '#ffe14d', '#a86b00', 60, 1900); saveGame(); }
+    }
+    s.time.addEvent({ delay: B * 500, repeat: STEPS - 1, callback: function () {
+      var fin = i >= STEPS - 4;   // finał: wszyscy razem w górę
+      cats.forEach(function (c, k) { if (c === drag) return; pose(c, fin ? DANCE[4 + (i % 2)] : DANCE[(i + (k % 2 ? 2 : 0) + (k % 3 === 2 ? 4 : 0)) % 8], k % 2 ? -1 : 1); });
+      if (i % 2 === 0) { light.setFillStyle(cols[(i / 2) % cols.length], 0.11);
+        var c = cats[Phaser.Math.Between(0, cats.length - 1)], t = notes[(i / 2) % notes.length];
+        if (c.outer.scene) { s.tweens.killTweensOf(t); t.setPosition(c.outer.x + Phaser.Math.Between(-30, 30), c.outer.y - 120).setAlpha(1).setVisible(true).setAngle(Phaser.Math.Between(-20, 20));
+          s.tweens.add({ targets: t, y: t.y - 80, alpha: 0, duration: 900, ease: 'Sine.easeOut' }); } }
+      i++; if (i >= STEPS) s.time.delayedCall(B * 500, finish);
+    } });
+  }
+
   function hop(s, cat) {
+    if (H.concert) return;
     s.tweens.killTweensOf(cat.hopper); cat.hopper.setPosition(0, FEET).setScale(1);
     s.tweens.add({ targets: cat.hopper, y: FEET - 18, scaleX: 0.96, scaleY: 1.07, duration: 130, yoyo: true, ease: 'Sine.easeOut' });
   }
@@ -4032,6 +4086,9 @@
       H.coinTxt = txt(s, 394, 56, '0', 30, '#ffffff', '#b36b00').setDepth(22);
       H.rate = txt(s, 360, 104, '0/s', 22, '#5a3d5c', '#ffffff').setDepth(22); H.coinIcon.base = H.coinIcon.scaleX; drawPills();
       H.gear = s.add.container(676, 132).setDepth(22).setSize(92, 92); var gb = s.add.circle(0, 0, 32, 0xffffff).setStrokeStyle(5, 0xb9a8ff), gi = s.add.image(0, 0, 'gear'); gi.setScale(40 / gi.width); H.gear.add([gb, gi]); H.gear.setInteractive(); button(s, H.gear, function () { openSettings(s); });
+      // Etap 46: przycisk Kociego Koncertu
+      H.note = s.add.container(676, 222).setDepth(22).setSize(92, 92); H.note.add([s.add.circle(0, 0, 32, 0xffffff).setStrokeStyle(5, 0xff9cc6), txt(s, 0, 2, '🎵', 36)]); H.note.setInteractive(); button(s, H.note, function () { startConcert(s); });
+      s.time.addEvent({ delay: 500, loop: true, callback: function () { H.note.setAlpha(H.concert || Date.now() < concertNext ? 0.45 : 1); } });
       H.devTag = txt(s, 676, 192, 'DEV', 26, '#ffffff', '#d4274d').setDepth(22).setVisible(devMode);
       // półki startowe
       for (var i = 0; i < Math.max(START_SLOTS, SV ? Math.min(NSLOTS, num(SV.openCount, 0)) : 0); i++) openShelf(s, i, false);
@@ -4085,7 +4142,7 @@
         for (var q = 0; q < openCount; q++) { discover(1 + q % 4); addCat(s, 1 + q % 4, q, false); }
         s.time.addEvent({ delay: 2600, loop: true, callback: function () { if (openCount >= NSLOTS) return; addExp(s, need(), 360, 700); var n = openCount - 1; if (!cells[n]) { var lv = 1 + (n * 7) % 4; discover(lv); addCat(s, lv, n, true); } } });
       }
-      if (/[?&]debug=1/.test(window.location.search)) window.__cc = { pickCat: pickCat, openMinigames: openMinigames, H: H, cells: cells, SX: SX, SY: SY, openCount: function () { return openCount; }, addExp: addExp, need: need, addCat: addCat, discover: discover, spawnBalloon: spawnBalloon, revealBall: revealBall, openMemory: openMemory, openMap: openMap, openAlbum: openAlbum, openShop: openShop, popBalloon: popBalloon, setGems: function (n) { gems = n; updateHUD(); }, openShelf: openShelf, fitCam: fitCam, getState: function () { return { gems: gems, coins: coins, pLevel: pLevel }; } };
+      if (/[?&]debug=1/.test(window.location.search)) window.__cc = { startConcert: startConcert, pickCat: pickCat, openMinigames: openMinigames, H: H, cells: cells, SX: SX, SY: SY, openCount: function () { return openCount; }, addExp: addExp, need: need, addCat: addCat, discover: discover, spawnBalloon: spawnBalloon, revealBall: revealBall, openMemory: openMemory, openMap: openMap, openAlbum: openAlbum, openShop: openShop, popBalloon: popBalloon, setGems: function (n) { gems = n; updateHUD(); }, openShelf: openShelf, fitCam: fitCam, getState: function () { return { gems: gems, coins: coins, pLevel: pLevel }; } };
     }
   });
 
