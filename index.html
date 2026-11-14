@@ -4613,6 +4613,21 @@
       H.pillG = pill;
       H.gemIcon = s.add.image(560, 56, 'gem').setDepth(22); H.gemIcon.setScale(44 / H.gemIcon.width); H.gemIcon.base = H.gemIcon.scaleX;   // jedna skala X=Y: kształt nie jest rozciągany
       H.gemTxt = txt(s, 640, 56, '0', 30, '#ffffff', '#2b1d9a').setDepth(22);
+      (function () {   // Etap 51b: SEKRETNY GEST taty – 3× stuknij gwiazdkę poziomu, potem przytrzymaj licznik diamentów ~2 s → tęczowa skrzynka. Bez żadnej podpowiedzi na ekranie.
+        var taps = [], armedAt = 0, holdT = null;
+        s.input.on('pointerdown', function (p) {
+          if (modalObjs.length) return; var now = Date.now();
+          if (p.x < 112 && p.y < 112) { taps = taps.filter(function (t) { return now - t < 1500; }); taps.push(now); if (taps.length >= 3) { armedAt = now; taps = []; } return; }
+          if (p.x > 500 && p.y < 100 && armedAt && now - armedAt < 4000) {
+            holdT = s.time.delayedCall(1800, function () { holdT = null; armedAt = 0; if (modalObjs.length) return;
+              var free = []; for (var i = 0; i < openCount; i++) if (!cells[i]) free.push(i);
+              if (!free.length) return; spawnBox(s, free[Math.floor(Math.random() * free.length)], false, true); sfx('fan1'); saveGame(); });
+            return;
+          }
+          taps = [];
+        });
+        s.input.on('pointerup', function () { if (holdT) { holdT.remove(); holdT = null; } });
+      })();
       H.coinIcon = s.add.image(284, 56, 'coin').setDepth(22); H.coinIcon.setScale(44 / H.coinIcon.width);
       H.coinTxt = txt(s, 394, 56, '0', 30, '#ffffff', '#b36b00').setDepth(22);
       H.rate = txt(s, 360, 104, '0/s', 22, '#5a3d5c', '#ffffff').setDepth(22); H.coinIcon.base = H.coinIcon.scaleX; drawPills();
