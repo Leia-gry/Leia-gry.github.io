@@ -189,10 +189,9 @@
   };
   // ======================================================================================
   var GW = 720, GH = 1280, K = 0.8075, FEET = 88, FLOOR_Y = 1010, SCR_FLOOR = 900, ZMAX = 0.65, ZMAX_B = 0.85, HUD_BOTTOM = 150;   // Etap 13: podstawa drapaka na ekranie y=900, bazowa skala świata 65% (-35%)
-  var START_COINS = 30, START_GEMS = 10, DUP_REFUND = 25, EXP_PER_MERGE = 10, START_SLOTS = 9, MAX_LEVEL = 40, TAPS_PER_BOX = 3, GOLD_EVERY = 30, GEM_LEVELUP = 25, GEM_MERGE_CHANCE = 0.25;
+  var START_COINS = 30, START_GEMS = 10, DUP_REFUND = 25, EXP_PER_MERGE = 10, START_SLOTS = 9, MAX_LEVEL = 36, TAPS_PER_BOX = 3, GOLD_EVERY = 30, GEM_LEVELUP = 25, GEM_MERGE_CHANCE = 0.25;
   var INCOME = [1, 3, 8, 15, 28, 50, 90, 160, 280, 480, 800, 1300, 2100, 3400, 5400, 8600, 13000, 20000, 30000, 45000, 68000, 100000, 150000, 230000,
-    350000, 530000, 800000, 1200000, 1800000, 2700000, 4000000, 6000000, 9000000, 13500000, 20000000, 30000000,
-    45000000, 68000000, 100000000, 150000000];   // 40 poziomów (25–36 = strona 3 „Bohaterowie”, 37–40 = strona 4)
+    350000, 530000, 800000, 1200000, 1800000, 2700000, 4000000, 6000000, 9000000, 13500000, 20000000, 30000000];   // 36 poziomów (25–36 = strona 3 „Bohaterowie”; Etap 48: koty 37–40 usunięte)
   // Siatka półek (kolumna, rząd). Pierwsze 9 = start 3x3; kolejne dodawane po 1 na każdy Level Up (pozycje istniejących nigdy się nie zmieniają)
   var CELLS = [[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1],[-1,2],[0,2],[1,2],
                [-1,3],[0,3],[1,3],
@@ -210,7 +209,7 @@
   // ======================================================================================
   var WEEKLY_TASKS = {
     title: 'Zadania Tygodnia',
-    secretRewardLevels: [1, 2, 3, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
+    secretRewardLevels: [1, 2, 3, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
     tasks: [
       { id: 'toys', icon: '🧸', name: 'Posprzątaj zabawki' },
       { id: 'veg', icon: '🥦', name: 'Zjedz warzywa' },
@@ -526,138 +525,6 @@
     }
   };
   // ======================================================================================
-  // Etap 45: KOTY 37–40 (Pirat, Księżniczka, Wąsaty Skoczek, Łowca Nagród) + formy specjalne. Źródła i skrypty: scratchpad/nc4 (key.py, parts.py, prev.py, build_v2.py, gen_js2.py).
-  //   Tułów (z przednimi łapkami i ogonem) pochodzi z dolnego rzędu arkusza – z kota w tej samej pozie, w której narysowano ubranka, więc ubranka leżą dokładnie tak jak na rysunku.
-  //   Głowa jest osobna (mruganie = headClosed). Bez osobnego ogona (noTail) i bez kołysania (still) – kot tylko „oddycha”, żeby ubranka się nie rozjeżdżały.
-  //   Forma specjalna: własny tułów i głowa (catNs_sheet.png) oraz WŁASNE ubranka (sr.acc – wycinki leżą w arkuszu zwykłym); przedmiot bez `sr` nie jest w formie specjalnej pokazywany.
-  const CAT37_SHEET_CONFIG = {
-    file: 'cat37_sheet.png', gs: 0.48, noTail: true, still: true,
-    eyesOpen: [], eyesClosed: ['headClosed'], top: [],
-    parts: {
-      body: { crop: { x: 4, y: 220, w: 199, h: 116 }, scale: 1.2565, offset: { x: -9.4, y: -71.6 } },
-      head: { crop: { x: 209, y: 220, w: 202, h: 209 }, scale: 1.2691, offset: { x: 0, y: -217.4 } },
-      headClosed: { crop: { x: 417, y: 220, w: 201, h: 208 }, scale: 1.2691, offset: { x: -0.6, y: -216.8 } }
-    },
-    acc: {
-      compass: { layer: 'head', crop: { x: 227, y: 460, w: 190, h: 124 }, cropIcon: { x: 868, y: 4, w: 210, h: 210 }, scale: 1.2565, offset: { x: -10.1, y: -79.2 } },
-      bottle: { layer: 'head', crop: { x: 838, y: 220, w: 153, h: 127 }, cropIcon: { x: 220, y: 4, w: 210, h: 210 }, scale: 1.2565, offset: { x: 14.5, y: -77.3 } },
-      braids: { layer: 'head', crop: { x: 4, y: 460, w: 217, h: 231 }, cropIcon: { x: 652, y: 4, w: 210, h: 210 }, scale: 1.2565, offset: { x: -1.9, y: -148.9 } },
-      patch: { layer: 'head', crop: { x: 997, y: 220, w: 136, h: 151 }, cropIcon: { x: 436, y: 4, w: 210, h: 210 }, scale: 1.2565, offset: { x: 37.7, y: -269.5 } },
-      bandana: { layer: 'head', crop: { x: 624, y: 220, w: 208, h: 234 }, cropIcon: { x: 4, y: 4, w: 210, h: 210 }, scale: 1.2565, offset: { x: -16.3, y: -219.9 } },
-      hat: { layer: 'head', crop: { x: 423, y: 460, w: 214, h: 330 }, cropIcon: { x: 1084, y: 4, w: 210, h: 210 }, scale: 1.2565, offset: { x: -7.5, y: -204.8 } }
-    },
-    sr: {
-      file: 'cat37s_sheet.png',
-      parts: {
-        body: { crop: { x: 4, y: 4, w: 200, h: 116 }, scale: 1.2565, offset: { x: -13.8, y: -71.6 } },
-        head: { crop: { x: 210, y: 4, w: 204, h: 208 }, scale: 1.2817, offset: { x: 0, y: -221.1 } },
-        headClosed: { crop: { x: 420, y: 4, w: 203, h: 209 }, scale: 1.2817, offset: { x: 1.9, y: -220.5 } }
-      },
-      acc: {
-        bandana: { crop: { x: 643, y: 460, w: 213, h: 193 }, scale: 1.2565, offset: { x: -19.5, y: -205.4 } },
-        bottle: { crop: { x: 862, y: 460, w: 152, h: 130 }, scale: 1.2565, offset: { x: 15.1, y: -79.2 } },
-        patch: { crop: { x: 1020, y: 460, w: 112, h: 137 }, scale: 1.2565, offset: { x: 17.6, y: -278.3 } },
-        braids: { crop: { x: 4, y: 796, w: 220, h: 291 }, scale: 1.2565, offset: { x: -5.0, y: -182.8 } },
-        compass: { crop: { x: 230, y: 796, w: 153, h: 122 }, scale: 1.2565, offset: { x: 9.4, y: -84.2 } },
-        hat: { crop: { x: 389, y: 796, w: 218, h: 155 }, scale: 1.2565, offset: { x: -10.1, y: -318.5 } }
-      }
-    }
-  };
-  const CAT38_SHEET_CONFIG = {
-    file: 'cat38_sheet.png', gs: 0.48, noTail: true, still: true,
-    eyesOpen: [], eyesClosed: ['headClosed'], top: [],
-    parts: {
-      body: { crop: { x: 4, y: 220, w: 212, h: 108 }, scale: 1.2766, offset: { x: -1.3, y: -67.7 } },
-      head: { crop: { x: 222, y: 220, w: 208, h: 211 }, scale: 1.2, offset: { x: 0, y: -223.4 } },
-      headClosed: { crop: { x: 436, y: 220, w: 206, h: 209 }, scale: 1.2, offset: { x: 2.4, y: -221.0 } }
-    },
-    acc: {
-      dress: { layer: 'head', crop: { x: 232, y: 503, w: 214, h: 128 }, cropIcon: { x: 868, y: 4, w: 210, h: 210 }, scale: 1.2766, offset: { x: 0.0, y: -80.4 } },
-      gloves: { layer: 'head', crop: { x: 648, y: 220, w: 176, h: 98 }, cropIcon: { x: 4, y: 4, w: 210, h: 210 }, scale: 1.2766, offset: { x: -17.9, y: -74.0 } },
-      peach: { layer: 'head', crop: { x: 1031, y: 220, w: 191, h: 127 }, cropIcon: { x: 436, y: 4, w: 210, h: 210 }, scale: 1.2766, offset: { x: -7.0, y: -81.1 } },
-      earrings: { layer: 'head', crop: { x: 830, y: 220, w: 195, h: 277 }, cropIcon: { x: 220, y: 4, w: 210, h: 210 }, scale: 1.2766, offset: { x: -5.7, y: -188.3 } },
-      umbrella: { layer: 'head', crop: { x: 4, y: 503, w: 222, h: 307 }, cropIcon: { x: 652, y: 4, w: 210, h: 210 }, scale: 1.2766, offset: { x: 8.9, y: -201.1 } },
-      crown: { layer: 'head', crop: { x: 452, y: 503, w: 121, h: 79 }, cropIcon: { x: 1084, y: 4, w: 210, h: 210 }, scale: 1.2766, offset: { x: 12.1, y: -347.9 } }
-    },
-    sr: {
-      file: 'cat38s_sheet.png',
-      parts: {
-        body: { crop: { x: 4, y: 4, w: 219, h: 118 }, scale: 1.2766, offset: { x: -5.7, y: -74.0 } },
-        head: { crop: { x: 229, y: 4, w: 208, h: 226 }, scale: 1.2064, offset: { x: 0, y: -236.2 } },
-        headClosed: { crop: { x: 443, y: 4, w: 206, h: 210 }, scale: 1.2064, offset: { x: 2.4, y: -225.3 } }
-      },
-      acc: {
-        gloves: { crop: { x: 579, y: 503, w: 201, h: 117 }, scale: 1.2766, offset: { x: -14.7, y: -79.8 } },
-        earrings: { crop: { x: 786, y: 503, w: 199, h: 151 }, scale: 1.2766, offset: { x: -13.4, y: -104.0 } },
-        peach: { crop: { x: 991, y: 503, w: 220, h: 169 }, scale: 1.2766, offset: { x: -2.6, y: -105.3 } },
-        umbrella: { crop: { x: 4, y: 816, w: 190, h: 122 }, scale: 1.2766, offset: { x: -17.9, y: -72.8 } },
-        crown: { crop: { x: 200, y: 816, w: 216, h: 125 }, scale: 1.2766, offset: { x: -3.8, y: -382.3 } }
-      }
-    }
-  };
-  const CAT39_SHEET_CONFIG = {
-    file: 'cat39_sheet.png', gs: 0.48, noTail: true, still: true,
-    eyesOpen: [], eyesClosed: ['headClosed'], top: [],
-    parts: {
-      body: { crop: { x: 4, y: 220, w: 199, h: 136 }, scale: 1.2228, offset: { x: -16.5, y: -81.9 } },
-      head: { crop: { x: 209, y: 220, w: 205, h: 213 }, scale: 1.1738, offset: { x: 0, y: -225.0 } },
-      headClosed: { crop: { x: 420, y: 220, w: 204, h: 213 }, scale: 1.1738, offset: { x: 1.8, y: -225.0 } }
-    },
-    acc: {
-      overalls: { layer: 'head', crop: { x: 961, y: 220, w: 133, h: 102 }, cropIcon: { x: 436, y: 4, w: 210, h: 210 }, scale: 1.2228, offset: { x: 10.4, y: -96.6 } },
-      gloves: { layer: 'head', crop: { x: 824, y: 220, w: 131, h: 123 }, cropIcon: { x: 220, y: 4, w: 210, h: 210 }, scale: 1.2228, offset: { x: 11.6, y: -75.2 } },
-      mushroom: { layer: 'head', crop: { x: 1100, y: 220, w: 151, h: 137 }, cropIcon: { x: 652, y: 4, w: 210, h: 210 }, scale: 1.2228, offset: { x: 9.2, y: -83.8 } },
-      flower: { layer: 'head', crop: { x: 4, y: 439, w: 151, h: 140 }, cropIcon: { x: 868, y: 4, w: 210, h: 210 }, scale: 1.2228, offset: { x: 7.9, y: -81.9 } },
-      star: { layer: 'head', crop: { x: 161, y: 439, w: 154, h: 137 }, cropIcon: { x: 1084, y: 4, w: 210, h: 210 }, scale: 1.2228, offset: { x: 12.2, y: -83.8 } },
-      cap: { layer: 'head', crop: { x: 630, y: 220, w: 188, h: 125 }, cropIcon: { x: 4, y: 4, w: 210, h: 210 }, scale: 1.2228, offset: { x: -4.9, y: -290.4 } }
-    },
-    sr: {
-      file: 'cat39s_sheet.png',
-      parts: {
-        body: { crop: { x: 4, y: 4, w: 192, h: 136 }, scale: 1.2228, offset: { x: -11.0, y: -81.9 } },
-        head: { crop: { x: 202, y: 4, w: 202, h: 219 }, scale: 1.2105, offset: { x: 0, y: -239.7 } },
-        headClosed: { crop: { x: 410, y: 4, w: 202, h: 219 }, scale: 1.2105, offset: { x: 1.2, y: -239.7 } }
-      },
-      acc: {
-        mushroom: { crop: { x: 321, y: 439, w: 219, h: 280 }, scale: 1.2228, offset: { x: -4.3, y: -176.1 } },
-        flower: { crop: { x: 546, y: 439, w: 163, h: 125 }, scale: 1.2228, offset: { x: 9.2, y: -102.1 } },
-        star: { crop: { x: 715, y: 439, w: 175, h: 145 }, scale: 1.2228, offset: { x: 16.5, y: -89.9 } }
-      }
-    }
-  };
-  const CAT40_SHEET_CONFIG = {
-    file: 'cat40_sheet.png', gs: 0.48, noTail: true, still: true,
-    eyesOpen: [], eyesClosed: ['headClosed'], top: [],
-    parts: {
-      body: { crop: { x: 4, y: 220, w: 197, h: 128 }, scale: 1.1838, offset: { x: -8.9, y: -74.6 } },
-      head: { crop: { x: 207, y: 220, w: 200, h: 209 }, scale: 1.095, offset: { x: 0, y: -235.6 } },
-      headClosed: { crop: { x: 413, y: 220, w: 200, h: 209 }, scale: 1.095, offset: { x: -1.1, y: -234.5 } }
-    },
-    acc: {
-      pads: { layer: 'head', crop: { x: 820, y: 220, w: 144, h: 43 }, cropIcon: { x: 220, y: 4, w: 210, h: 210 }, scale: 1.1838, offset: { x: 10.7, y: -119.0 } },
-      jetpack: { layer: 'head', crop: { x: 224, y: 519, w: 223, h: 297 }, cropIcon: { x: 868, y: 4, w: 210, h: 210 }, scale: 1.1838, offset: { x: 19.5, y: -175.8 } },
-      cape: { layer: 'head', crop: { x: 970, y: 220, w: 224, h: 139 }, cropIcon: { x: 436, y: 4, w: 210, h: 210 }, scale: 1.1838, offset: { x: -3.6, y: -82.3 } },
-      plate: { layer: 'head', crop: { x: 619, y: 220, w: 195, h: 293 }, cropIcon: { x: 4, y: 4, w: 210, h: 210 }, scale: 1.1838, offset: { x: 8.9, y: -173.4 } },
-      rifle: { layer: 'head', crop: { x: 4, y: 519, w: 214, h: 143 }, cropIcon: { x: 652, y: 4, w: 210, h: 210 }, scale: 1.1838, offset: { x: 14.2, y: -84.6 } },
-      helmet: { layer: 'head', crop: { x: 453, y: 519, w: 194, h: 200 }, cropIcon: { x: 1084, y: 4, w: 210, h: 210 }, scale: 1.1838, offset: { x: 9.5, y: -258.1 } }
-    },
-    sr: {
-      file: 'cat40s_sheet.png',
-      parts: {
-        body: { crop: { x: 4, y: 4, w: 210, h: 132 }, scale: 1.1838, offset: { x: 0.0, y: -76.9 } },
-        head: { crop: { x: 220, y: 4, w: 204, h: 215 }, scale: 1.1246, offset: { x: 0, y: -232.0 } },
-        headClosed: { crop: { x: 430, y: 4, w: 203, h: 207 }, scale: 1.1246, offset: { x: 3.9, y: -236.5 } }
-      },
-      acc: {
-        plate: { crop: { x: 653, y: 519, w: 204, h: 149 }, scale: 1.1838, offset: { x: 2.4, y: -88.2 } },
-        cape: { crop: { x: 863, y: 519, w: 184, h: 140 }, scale: 1.1838, offset: { x: 27.2, y: -82.9 } },
-        rifle: { crop: { x: 1053, y: 519, w: 213, h: 139 }, scale: 1.1838, offset: { x: 7.7, y: -94.1 } },
-        jetpack: { crop: { x: 4, y: 822, w: 207, h: 150 }, scale: 1.1838, offset: { x: 10.1, y: -87.6 } },
-        helmet: { crop: { x: 217, y: 822, w: 199, h: 221 }, scale: 1.1838, offset: { x: 4.1, y: -262.2 } }
-      }
-    }
-  };
-  // ======================================================================================
   // ETAP 16: GENERYCZNY SYSTEM AKCESORIÓW (motywy 4–24). Przedmiot = [nazwa, kształt, kolor1, kolor2, strona?].
   // KOLOR PRZEDMIOTU JEST ZAPISANY W JEGO DEFINICJI (wałek brązowy, patelnia szara…) – Tier (Zwykły/Rzadki/Epicki/Legendarny)
   // to wyłącznie RZADKOŚĆ: slot 0,1 = Zwykły, 2,3 = Rzadki, 4 = Epicki, 5 = Legendarny (pokazywana poświatą/ramką, nigdy kolorem SVG).
@@ -785,44 +652,15 @@
     { n: 'Peleryna wampira', a: 'pelerynę wampira', g: 'f', png: true, sheet: 'cape' },
     { n: 'Nietoperek', a: 'nietoperka', g: 'ma', png: true, sheet: 'bat' },
     { n: 'Latarnia z nietoperzami', a: 'latarnię z nietoperzami', g: 'f', png: true, sheet: 'lantern' }] };
-  THEMES[37] = { name: 'Pirat', items: [
-    { n: 'Czerwona bandana', a: 'czerwoną bandanę', g: 'f', png: true, sheet: 'bandana', sr: true },
-    { n: 'Butelka z miksturą', a: 'butelkę z miksturą', g: 'f', png: true, sheet: 'bottle', sr: true },
-    { n: 'Opaska na oko', a: 'opaskę na oko', g: 'f', png: true, sheet: 'patch', sr: true },
-    { n: 'Warkoczyki z koralikami', a: 'warkoczyki z koralikami', g: 'p', png: true, sheet: 'braids', sr: true },
-    { n: 'Złoty kompas', a: 'złoty kompas', g: 'm', png: true, sheet: 'compass', sr: true },
-    { n: 'Piracki kapelusz', a: 'piracki kapelusz', g: 'm', png: true, sheet: 'hat', sr: true }] };
-  THEMES[38] = { name: 'Księżniczka', items: [
-    { n: 'Białe rękawiczki', a: 'białe rękawiczki', g: 'p', png: true, sheet: 'gloves', sr: true },
-    { n: 'Kolczyki', a: 'kolczyki', g: 'p', png: true, sheet: 'earrings', sr: true },
-    { n: 'Brzoskwinka', a: 'brzoskwinkę', g: 'f', png: true, sheet: 'peach', sr: true },
-    { n: 'Różowa parasolka', a: 'różową parasolkę', g: 'f', png: true, sheet: 'umbrella', sr: true },
-    { n: 'Różowa suknia', a: 'różową suknię', g: 'f', png: true, sheet: 'dress' },
-    { n: 'Złota korona', a: 'złotą koronę', g: 'f', png: true, sheet: 'crown', sr: true }] };
-  THEMES[39] = { name: 'Wąsaty Skoczek', items: [
-    { n: 'Czerwona czapka', a: 'czerwoną czapkę', g: 'f', png: true, sheet: 'cap' },
-    { n: 'Białe rękawiczki', a: 'białe rękawiczki', g: 'p', png: true, sheet: 'gloves' },
-    { n: 'Niebieskie ogrodniczki', a: 'niebieskie ogrodniczki', g: 'p', png: true, sheet: 'overalls' },
-    { n: 'Grzybek', a: 'grzybek', g: 'm', png: true, sheet: 'mushroom', sr: true },
-    { n: 'Ognisty kwiatek', a: 'ognisty kwiatek', g: 'm', png: true, sheet: 'flower', sr: true },
-    { n: 'Gwiazdka', a: 'gwiazdkę', g: 'f', png: true, sheet: 'star', sr: true }] };
-  THEMES[40] = { name: 'Łowca Nagród', items: [
-    { n: 'Tabliczka z herbem', a: 'tabliczkę z herbem', g: 'f', png: true, sheet: 'plate', sr: true },
-    { n: 'Złote naramienniki', a: 'złote naramienniki', g: 'p', png: true, sheet: 'pads' },
-    { n: 'Peleryna', a: 'pelerynę', g: 'f', png: true, sheet: 'cape', sr: true },
-    { n: 'Blaster', a: 'blaster', g: 'm', png: true, sheet: 'rifle', sr: true },
-    { n: 'Plecak odrzutowy', a: 'plecak odrzutowy', g: 'm', png: true, sheet: 'jetpack', sr: true },
-    { n: 'Hełm łowcy', a: 'hełm łowcy', g: 'm', png: true, sheet: 'helmet', sr: true }] };
   function themeOf(lvl) { return THEMES[lvl] || THEME_CLASSIC; }
   function itemOf(lvl, slot) { return themeOf(lvl).items[slot]; }
   Object.keys(THEMES).forEach(function (L) { THEMES[L].items.forEach(function (it, i) { if (!it.png) it.key = 'th' + L + '_' + i; it.ang = it.ang || 0; }); });
   // ===== SECRET RARE: pełna zamiana wyglądu kota danego poziomu (nagroda za Zadania Tygodnia) =====
   var SECRET = { 1: { name: 'Tęczowy Jednorożec' }, 3: { name: 'Holograficzna Syjamka' }, 9: { name: 'Różowe Serduszko' } };
-  SECRET[37] = { name: 'Pirat Kosteczka' }; SECRET[38] = { name: 'Lodowa Księżniczka' }; SECRET[39] = { name: 'Złoty Skoczek' }; SECRET[40] = { name: 'Niebieski Łowca' };   // Etap 44
   var TIERS = [
     {col:0xcfcfe0,p:50,slots:[0,1],f:'Białą',pl:'Białe',name:'Zwykły'}, {col:0x3ecf6b,p:30,slots:[2,3],f:'Zieloną',pl:'Zielone',name:'Rzadki'},
     {col:0x3a9bff,p:15,slots:[4],f:'Niebieską',pl:'Niebieskie',name:'Epicki'}, {col:0xffc400,p:5,slots:[5],f:'Złotą',pl:'Złote',name:'Legendarny'}];
-  var NAME_POOL = ['Puszek', 'Łatek', 'Mruczek', 'Kłębek', 'Śnieżka', 'Filemon', 'Bursztyn', 'Pazurek', 'Mgiełka', 'Ciapek', 'Wąsik', 'Gizmo', 'Kropka', 'Rudy', 'Cukier', 'Bąbel', 'Mizia', 'Szarotka', 'Tygrys', 'Perełka', 'Fąfel', 'Karmel', 'Pimpek', 'Iskierka', 'Nutka', 'Lukier', 'Zefirek', 'Ogonek', 'Kotlet', 'Brzoskwinka', 'Figa', 'Pączek', 'Gwiazdka', 'Kminek', 'Bajka', 'Psotka', 'Rogalik', 'Chmurka', 'Migdał', 'Truskawka', 'Hultaj', 'Pianka', 'Żelek', 'Malina', 'Bosman', 'Różyczka', 'Skoczek', 'Tropik'];   // 48 imion na 40 kotów
+  var NAME_POOL = ['Puszek', 'Łatek', 'Mruczek', 'Kłębek', 'Śnieżka', 'Filemon', 'Bursztyn', 'Pazurek', 'Mgiełka', 'Ciapek', 'Wąsik', 'Gizmo', 'Kropka', 'Rudy', 'Cukier', 'Bąbel', 'Mizia', 'Szarotka', 'Tygrys', 'Perełka', 'Fąfel', 'Karmel', 'Pimpek', 'Iskierka', 'Nutka', 'Lukier', 'Zefirek', 'Ogonek', 'Kotlet', 'Brzoskwinka', 'Figa', 'Pączek', 'Gwiazdka', 'Kminek', 'Bajka', 'Psotka', 'Rogalik', 'Chmurka', 'Migdał', 'Truskawka', 'Hultaj', 'Pianka', 'Żelek', 'Malina'];   // 44 imiona na 36 kotów
   var ADV_SPEED = Number((String(window.location.search).match(/adv=(\d+)/) || [])[1]) || 1; // ?adv=60 przyspiesza czas do testów
   // przygody: czas w godzinach, nagroda: diamenty + kule (indeksy BALLS)
   var ADV_TIERS = [
@@ -1806,7 +1644,7 @@
     return cat;
   }
   // ----- Etap 22/30: koty z arkuszy (Lvl 2, Lvl 3 + forma SUPER) – wycinanie wg CAT?_SHEET_CONFIG, bez obróbki pikseli
-  var SHEET_CATS = { 2: CAT2_SHEET_CONFIG, 3: CAT3_SHEET_CONFIG, 4: CAT4_SHEET_CONFIG, 5: CAT5_SHEET_CONFIG, 6: CAT6_SHEET_CONFIG, 7: CAT7_SHEET_CONFIG, 8: CAT8_SHEET_CONFIG, 9: CAT9_SHEET_CONFIG, 10: CAT10_SHEET_CONFIG, 11: CAT11_SHEET_CONFIG, 12: CAT12_SHEET_CONFIG, 37: CAT37_SHEET_CONFIG, 38: CAT38_SHEET_CONFIG, 39: CAT39_SHEET_CONFIG, 40: CAT40_SHEET_CONFIG }, SHEET_REFS = {};
+  var SHEET_CATS = { 2: CAT2_SHEET_CONFIG, 3: CAT3_SHEET_CONFIG, 4: CAT4_SHEET_CONFIG, 5: CAT5_SHEET_CONFIG, 6: CAT6_SHEET_CONFIG, 7: CAT7_SHEET_CONFIG, 8: CAT8_SHEET_CONFIG, 9: CAT9_SHEET_CONFIG, 10: CAT10_SHEET_CONFIG, 11: CAT11_SHEET_CONFIG, 12: CAT12_SHEET_CONFIG }, SHEET_REFS = {};
   function isSheet(l) { return !!SHEET_CATS[l]; }
   function sheetKey(f) { return f.replace(/\.png$/, ''); }
   function accDef(C, k, sec) {   // definicja akcesorium; w formie SR z nadpisaniami z C.sr.acc
@@ -3097,7 +2935,8 @@
   function cleanNames(src) { var o = {}, n = obj(src); for (var l = 1; l <= MAX_LEVEL; l++) if (typeof n[l] === 'string' && n[l].trim()) o[l] = n[l].replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 14); return o; }   // 24 imion: tylko poziomy 1–24, tylko tekst, max 14 znaków
   function restoreVars(d) {   // wczytuje zmienne (bez obiektów Phasera); koty i półki odtwarza create()
     coins = num(d.coins, coins); gems = num(d.gems, gems); pLevel = Math.max(1, num(d.pLevel, 1)); pExp = Math.max(0, num(d.pExp, 0)); tapsLeft = Math.max(1, Math.min(TAPS_PER_BOX, num(d.tapsLeft, TAPS_PER_BOX))); boxCount = Math.max(0, num(d.boxCount, 0));
-    discovered = obj(d.discovered); names = cleanNames(d.names); Object.keys(FIXED_NAMES).forEach(function (l) { if (discovered[l]) names[l] = FIXED_NAMES[l]; }); hiddenAcc = obj(d.hiddenAcc); secretOwn = obj(d.secretOwn); secretShow = obj(d.secretShow); taskDone = obj(d.taskDone); secretReady = !!d.secretReady;
+    discovered = obj(d.discovered); Object.keys(discovered).forEach(function (l) { if (+l > MAX_LEVEL) delete discovered[l]; });   // Etap 48: bez usuniętych poziomów
+    names = cleanNames(d.names); Object.keys(FIXED_NAMES).forEach(function (l) { if (discovered[l]) names[l] = FIXED_NAMES[l]; }); hiddenAcc = obj(d.hiddenAcc); secretOwn = obj(d.secretOwn); secretShow = obj(d.secretShow); [secretOwn, secretShow].forEach(function (o) { Object.keys(o).forEach(function (l) { if (+l > MAX_LEVEL) delete o[l]; }); }); taskDone = obj(d.taskDone); secretReady = !!d.secretReady;
     owned = {}; var od = obj(d.owned); Object.keys(discovered).forEach(function (l) { var a = od[l], r = []; for (var i = 0; i < 6; i++) r.push(a && a[i] ? 1 : 0); owned[l] = r; });
     DEC_KEYS.forEach(function (k) { var so = obj(obj(d.decorOwn)[k]); Object.keys(so).forEach(function (id) { if (DEC[k][id] && so[id]) decorOwn[k][id] = 1; }); });
     decorSel.bg = DEC.bg[d.bg] ? d.bg : 0;
@@ -4160,6 +3999,7 @@
       fitCam(s, true);
       if (SV && Array.isArray(SV.cells)) SV.cells.forEach(function (c, i) {   // odtworzenie kotów i pudełek
         if (!c || i >= openCount || cells[i]) return;
+        if (c.t === 'c' && c.l > MAX_LEVEL) c.l = MAX_LEVEL;   // Etap 48: kot z usuniętego poziomu (37–40) wraca jako kot 36
         if (c.t === 'c' && c.l >= 1 && c.l <= MAX_LEVEL) { discover(c.l); var rc = addCat(s, c.l, i, false); if (c.cr && toysOwned.crown) putCrown(rc); } else if (c.t === 'b') spawnBox(s, i, !!c.g);
       });
       // dół: tylko transporter na środku + przycisk Kocia Łapka (szuflada menu)
@@ -4211,7 +4051,7 @@
   });
 
   // Etap 42b: grafiki SVG rysowane na canvas przed startem (bez XHR na blob: – nie działało w niektórych przeglądarkach)
-  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'7dabec26';
+  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'a337d3bd';
   function imgUrl(f) { return f.replace(/\.png$/, IMG_EXT) + (ASSET_V !== 'dev' ? '?v=' + ASSET_V : ''); }   // Etap 43: grafiki jako WebP (5× mniejsze), PNG gdy przeglądarka nie umie
   var PREIMG = {};
   function preImgs() {   // Etap 43: grafiki kotów pobierają się i dekodują od razu, równolegle z resztą startu (atlas, zapis online, uruchamianie Phasera)
