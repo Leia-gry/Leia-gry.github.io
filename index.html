@@ -189,9 +189,10 @@
   };
   // ======================================================================================
   var GW = 720, GH = 1280, K = 0.8075, FEET = 88, FLOOR_Y = 1010, SCR_FLOOR = 900, ZMAX = 0.65, ZMAX_B = 0.85, HUD_BOTTOM = 150;   // Etap 13: podstawa drapaka na ekranie y=900, bazowa skala świata 65% (-35%)
-  var START_COINS = 30, START_GEMS = 10, DUP_REFUND = 25, EXP_PER_MERGE = 10, START_SLOTS = 9, MAX_LEVEL = 36, TAPS_PER_BOX = 3, GOLD_EVERY = 30, GEM_LEVELUP = 25, GEM_MERGE_CHANCE = 0.25;
+  var START_COINS = 30, START_GEMS = 10, DUP_REFUND = 25, EXP_PER_MERGE = 10, START_SLOTS = 9, MAX_LEVEL = 48, TAPS_PER_BOX = 3, GOLD_EVERY = 30, GEM_LEVELUP = 25, GEM_MERGE_CHANCE = 0.25;
   var INCOME = [1, 3, 8, 15, 28, 50, 90, 160, 280, 480, 800, 1300, 2100, 3400, 5400, 8600, 13000, 20000, 30000, 45000, 68000, 100000, 150000, 230000,
-    350000, 530000, 800000, 1200000, 1800000, 2700000, 4000000, 6000000, 9000000, 13500000, 20000000, 30000000];   // 36 poziomów (25–36 = strona 3 „Bohaterowie”; Etap 48: koty 37–40 usunięte)
+    350000, 530000, 800000, 1200000, 1800000, 2700000, 4000000, 6000000, 9000000, 13500000, 20000000, 30000000,
+    45000000, 68000000, 100000000, 150000000, 225000000, 340000000, 510000000, 760000000, 1150000000, 1700000000, 2600000000, 3900000000];   // 48 poziomów (25–36 = strona 3 „Bohaterowie”, 37–48 = strona 4)
   // Siatka półek (kolumna, rząd). Pierwsze 9 = start 3x3; kolejne dodawane po 1 na każdy Level Up (pozycje istniejących nigdy się nie zmieniają)
   var CELLS = [[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1],[-1,2],[0,2],[1,2],
                [-1,3],[0,3],[1,3],
@@ -209,7 +210,7 @@
   // ======================================================================================
   var WEEKLY_TASKS = {
     title: 'Zadania Tygodnia',
-    secretRewardLevels: [1, 2, 3, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+    secretRewardLevels: [1, 2, 3, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48],
     tasks: [
       { id: 'toys', icon: '🧸', name: 'Posprzątaj zabawki' },
       { id: 'veg', icon: '🥦', name: 'Zjedz warzywa' },
@@ -660,7 +661,7 @@
   var TIERS = [
     {col:0xcfcfe0,p:50,slots:[0,1],f:'Białą',pl:'Białe',name:'Zwykły'}, {col:0x3ecf6b,p:30,slots:[2,3],f:'Zieloną',pl:'Zielone',name:'Rzadki'},
     {col:0x3a9bff,p:15,slots:[4],f:'Niebieską',pl:'Niebieskie',name:'Epicki'}, {col:0xffc400,p:5,slots:[5],f:'Złotą',pl:'Złote',name:'Legendarny'}];
-  var NAME_POOL = ['Puszek', 'Łatek', 'Mruczek', 'Kłębek', 'Śnieżka', 'Filemon', 'Bursztyn', 'Pazurek', 'Mgiełka', 'Ciapek', 'Wąsik', 'Gizmo', 'Kropka', 'Rudy', 'Cukier', 'Bąbel', 'Mizia', 'Szarotka', 'Tygrys', 'Perełka', 'Fąfel', 'Karmel', 'Pimpek', 'Iskierka', 'Nutka', 'Lukier', 'Zefirek', 'Ogonek', 'Kotlet', 'Brzoskwinka', 'Figa', 'Pączek', 'Gwiazdka', 'Kminek', 'Bajka', 'Psotka', 'Rogalik', 'Chmurka', 'Migdał', 'Truskawka', 'Hultaj', 'Pianka', 'Żelek', 'Malina'];   // 44 imiona na 36 kotów
+  var NAME_POOL = ['Puszek', 'Łatek', 'Mruczek', 'Kłębek', 'Śnieżka', 'Filemon', 'Bursztyn', 'Pazurek', 'Mgiełka', 'Ciapek', 'Wąsik', 'Gizmo', 'Kropka', 'Rudy', 'Cukier', 'Bąbel', 'Mizia', 'Szarotka', 'Tygrys', 'Perełka', 'Fąfel', 'Karmel', 'Pimpek', 'Iskierka', 'Nutka', 'Lukier', 'Zefirek', 'Ogonek', 'Kotlet', 'Brzoskwinka', 'Figa', 'Pączek', 'Gwiazdka', 'Kminek', 'Bajka', 'Psotka', 'Rogalik', 'Chmurka', 'Migdał', 'Truskawka', 'Hultaj', 'Pianka', 'Żelek', 'Malina', 'Baletka', 'Lukrecja', 'Plasterek', 'Kleksik', 'Rumianek', 'Iskra', 'Drzemka', 'Gitarka', 'Lupek', 'Bzyczek', 'Ostroga', 'Piernik'];   // 56 imion na 48 kotów
   var ADV_SPEED = Number((String(window.location.search).match(/adv=(\d+)/) || [])[1]) || 1; // ?adv=60 przyspiesza czas do testów
   // przygody: czas w godzinach, nagroda: diamenty + kule (indeksy BALLS)
   var ADV_TIERS = [
@@ -1528,6 +1529,286 @@
       it('Korona króla smoków', 'koronę króla smoków', 'f', [90, 66], 100, 36, 62, 0, Pt('M8 58 L6 22 L24 38 L32 8 L45 34 L58 8 L66 38 L84 22 L82 58 Z', '#ffd23f', '#b98a12') + Cn(6, 20, 4.5, '#ff5a7a', '#b3264a', 2) + Cn(84, 20, 4.5, '#ff5a7a', '#b3264a', 2) + Cn(32, 7, 4.5, '#59c3ff', '#2a78d0', 2) + Cn(58, 7, 4.5, '#59c3ff', '#2a78d0', 2) + R(8, 48, 74, 12, 4, '#ffb22e', '#b98a12', 3) + Pt('M45 38 l7 8 l-7 9 l-7 -9 Z', '#ff5a7a', '#b3264a', 2.5) + Ln('M14 30 l2 14', '#fff7c2', 2.5))
     ], sr: { name: 'Złoty Smok' } };
     fin(36, c36);
+    // ======================================================================================
+    // ETAP 49: STRONA 4 ALBUMU (poziomy 37–48) – własne postacie. Ulepszony rysunek: cieniowanie głowy i tułowia,
+    //   puszyste policzki, kępka futra na piersi, błyszczące oczy z gradientem (baseX / eyesX). Stare koty bez zmian.
+    // ======================================================================================
+    function lt(c, k) { var n = parseInt(c.slice(1), 16), f = k || 0.5, r = n >> 16, g = (n >> 8) & 255, b = n & 255; r = Math.round(r + (255 - r) * f); g = Math.round(g + (255 - g) * f); b = Math.round(b + (255 - b) * f); return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1); }
+    function rgrad(id, c0, a0, c1, a1, cx, cy, r) { return '<defs><radialGradient id="' + id + '" cx="' + (cx || 0.5) + '" cy="' + (cy || 0.5) + '" r="' + (r || 0.6) + '"><stop offset="0" stop-color="' + c0 + '" stop-opacity="' + a0 + '"/><stop offset="1" stop-color="' + c1 + '" stop-opacity="' + a1 + '"/></radialGradient></defs>'; }
+    function fluffCheeks(fur, ol) { var t = Pt('M48 92 L30 98 L42 104 L27 113 L43 116 L34 127 L52 122 Q50 106 48 92 Z', fur, ol, 3.4); return t + mir(t); }
+    function baseX(o) {
+      var fur = o.head || o.fur, ol = o.ol || O, sd = o.shadeC || dk(o.fur, 0.55);
+      var q = {}; Object.keys(o).forEach(function (k) { q[k] = o[k]; });
+      q.headUnder = (o.fluff === false ? '' : fluffCheeks(fur, ol)) + (o.headUnder || '');
+      q.headClip = rgrad('shH', '#ffffff', 0.5, sd, 0.32, 0.36, 0.22, 0.9) + '<ellipse cx="100" cy="88" rx="62" ry="50" fill="url(#shH)"/>' + (o.headClip || '');
+      var tor = o.torso !== undefined ? o.torso : En(100, 170, 27, 22, o.fur2 || '#fff');
+      q.torso = tor + En(100, 120, 44, 13, sd, 0.3) + rgrad('shT', '#ffffff', 0.3, sd, 0.3, 0.38, 0.3, 0.85) + '<ellipse cx="100" cy="152" rx="48" ry="37" fill="url(#shT)"/>';
+      if (o.chest) q.torso += Pt('M84 117 L90 128 L95 120 L100 131 L105 120 L110 128 L116 117 Z', o.chest, 0);
+      return base(q);
+    }
+    function eyesX(col, o) { o = o || {}; var c2 = dk(col, 0.55), c1 = lt(col, 0.35);
+      function one(x, k) { var y = 92, id = 'ir' + k, s = '<defs><radialGradient id="' + id + '" cx="0.5" cy="0.72" r="0.7"><stop offset="0" stop-color="' + c1 + '"/><stop offset="0.55" stop-color="' + col + '"/><stop offset="1" stop-color="' + c2 + '"/></radialGradient></defs>';
+        s += En(x, y, 12.8, 15.6, '#1d1830') + En(x, y + 2.5, 10, 12, 'url(#' + id + ')') + En(x, y + 3.5, 4.6, 6.4, '#14161e') + Ln('M' + (x - 6.5) + ' ' + (y + 10) + ' Q' + x + ' ' + (y + 14) + ' ' + (x + 6.5) + ' ' + (y + 10), lt(col, 0.6), 2.2);
+        s += '<circle cx="' + (x - 4.6) + '" cy="' + (y - 6.4) + '" r="5.4" fill="#fff"/><circle cx="' + (x + 4.8) + '" cy="' + (y + 6.2) + '" r="2.5" fill="#fff"/><circle cx="' + (x + 5.5) + '" cy="' + (y - 4) + '" r="1.4" fill="#fff" opacity=".85"/>';
+        if (o.lash) s += Ln('M' + (x < 100 ? x - 11 : x + 11) + ' ' + (y - 8) + ' l' + (x < 100 ? -6.5 : 6.5) + ' -4 M' + (x < 100 ? x - 7.5 : x + 7.5) + ' ' + (y - 12.5) + ' l' + (x < 100 ? -4 : 4) + ' -6', O, 2.6);
+        if (o.star) s += spark(x + 6.5, y - 9.5, 3.6, '#fff');
+        return s; }
+      return one(76, 'L') + one(124, 'R') + (o.extra || '');
+    }
+    function pair(g, w) { return g + G('translate(' + w + ' 0) scale(-1 1)', g); }
+    // ---------- 37: BALETNICA (specjal: Księżycowa Baletnica) ----------
+    function c37(v) {
+      var fur = v ? '#3c4380' : '#e4dcef', f2 = v ? '#6b74b8' : '#ffffff', leo = v ? '#c9d2ff' : '#ff9ec7', leoD = v ? '#8e9ae6' : '#f06fa8', tu = v ? '#e9edff' : '#ffc4dd', tu2 = v ? '#ffffff' : '#ffe3ef';
+      var torso = R(40, 110, 120, 90, 0, leo, 0) + Pn('M64 108 Q100 146 136 108 Z', fur) + Ln('M64 110 Q100 146 136 110', leoD, 3) + (v ? spark(84, 150, 4.5, '#fff') + spark(118, 158, 3.5, '#fff') : Cn(100, 142, 3.2, '#fff', leoD) + Cn(91, 138, 2.2, '#fff', 0) + Cn(109, 138, 2.2, '#fff', 0));
+      var tutu = Pt('M40 160 Q22 172 34 182 Q40 192 56 186 Q66 196 80 189 Q90 197 100 190 Q110 197 120 189 Q134 196 144 186 Q160 192 166 182 Q178 172 160 160 Z', tu)
+        + Pn('M46 162 Q34 172 44 178 Q52 186 64 180 Q74 188 86 182 Q100 189 114 182 Q126 188 136 180 Q148 186 156 178 Q166 172 154 162 Z', tu2)
+        + Ln('M52 170 q8 6 16 0 M84 174 q8 6 16 0 M116 172 q8 6 16 0', v ? '#b8c3ff' : '#ff9ec7', 2.4) + Pt('M46 158 Q100 172 154 158 L154 152 Q100 166 46 152 Z', leoD, O, 3)
+        + (v ? spark(40, 176, 5, '#fff') + spark(160, 176, 5, '#fff') + Cn(100, 186, 1.8, '#fff', 0) : '');
+      var c = baseX({ fur: fur, fur2: f2, earIn: v ? '#b8c3ff' : '#ffc4dd', torso: torso, torsoOver: tutu, arms: fur, feetC: v ? '#e9edff' : '#ffd3e4', toeC: v ? '#8e9ae6' : '#f06fa8', mouth: 'smile', nose: v ? '#ff9ec7' : '#ff7f9e', chest: false,
+        cheeks: v ? '#a7b2ff' : '#ff8aa5', whisk: v ? '#b8c3ff' : '#8e7fa0',
+        headClip: v ? Cn(66, 58, 1.8, '#fff', 0) + Cn(140, 60, 2.2, '#fff', 0) + Cn(126, 46, 1.4, '#fff', 0) + Cn(52, 80, 1.4, '#fff', 0) + Pn('M60 48 a10 10 0 1 0 12 -10 a8 8 0 1 1 -12 10 Z', '#fff4c2') : Pn('M104 40 Q118 30 132 40 Q128 52 116 52 Z', '#cfc4e0'),
+        back: v ? En(100, 110, 96, 98, '#8e9ae6', 0.18) : '',
+        headOver: v ? spark(164, 50, 8, '#fff4c2') + spark(30, 68, 6, '#fff4c2') : '' });
+      var tail = v ? tailFluff(0, fur, '#6b74b8', O, '#e9edff') : tailFluff(0, fur, '#ffffff', O, '#cfc4e0');
+      return { cat: c, tail: tail, eyes: eyesX(v ? '#8fb2ff' : '#7a6bd0', { lash: 1, star: v }) };
+    }
+    HERO[37] = { theme: 'Baletnica', items: [
+      it('Różowa kokardka', 'różową kokardkę', 'f', [80, 50], 138, 42, 46, 18, Pt('M40 25 Q22 4 8 10 Q2 24 8 38 Q22 46 40 25 Z', '#ff8ab8') + Pt('M40 25 Q58 4 72 10 Q78 24 72 38 Q58 46 40 25 Z', '#ff8ab8') + Ln('M14 16 Q24 18 32 24 M66 16 Q56 18 48 24', '#ffc4dd', 3) + E(40, 25, 8, 9, '#ff6fa8', O) + Pt('M36 32 L28 48 L36 46 L40 34 Z', '#ff6fa8', O, 2.6) + Pt('M44 32 L52 48 L44 46 L40 34 Z', '#ff6fa8', O, 2.6)),
+      it('Baletki', 'baletki', 'p', [118, 40], 100, 186, 112, 0, pair(Pt('M8 22 Q8 8 26 8 Q46 8 50 20 Q50 32 30 32 Q8 32 8 22 Z', '#ffb3d1') + Pn('M14 21 Q16 14 28 14 Q42 14 44 20 Q38 26 28 26 Q18 26 14 21 Z', '#ffd8e8') + Ln('M28 9 Q20 -2 10 0 M30 9 Q34 -2 44 -1', '#ff6fa8', 2.6) + Cn(30, 9, 3, '#ff6fa8', O), 118)),
+      it('Pozytywka', 'pozytywkę', 'f', [64, 74], 40, 166, 50, -6, R(6, 34, 52, 36, 7, '#c99cf2', O) + R(6, 34, 52, 10, 4, '#a679e0', O, 3) + Cn(32, 54, 7, '#ffe27a', '#b98a12') + Ln('M28 54 h8 M32 50 v8', '#b98a12', 2) + Ln('M58 48 h6 v8', O, 3) + Ln('M32 34 V22', O, 3) + E(32, 20, 4, 4, '#ff9ec7', O) + Pt('M32 4 Q42 10 34 18 Q30 14 32 4 Z', '#ff9ec7', O, 2.4) + Pt('M24 14 Q32 18 40 14 Q36 22 32 22 Q28 22 24 14 Z', '#ffc4dd', O, 2.4) + Ln('M46 10 q3 -4 6 0 M52 4 v6', '#7a6bd0', 2.4)),
+      it('Bukiet róż', 'bukiet róż', 'm', [62, 80], 158, 156, 48, 14, Pt('M22 44 L30 76 L36 76 L42 44 Z', '#5ccf6b', O, 3) + Pt('M14 46 Q32 58 50 46 L44 62 Q32 66 20 62 Z', '#ffffff', O, 3) + Pn('M18 40 Q8 30 16 22 Q26 30 22 40 Z', '#5ccf6b') + Pn('M46 40 Q56 30 48 22 Q38 30 42 40 Z', '#5ccf6b') + [[20, 28], [32, 18], [44, 28], [32, 34]].map(function (p, i) { return Cn(p[0], p[1], 10, ['#ff6f91', '#ff9ec7', '#ff6f91', '#ffb3d1'][i], O) + Ln('M' + (p[0] - 4) + ' ' + (p[1] - 1) + ' q4 -4 7 1 q-2 5 -6 3', dk(['#ff6f91', '#ff9ec7', '#ff6f91', '#ffb3d1'][i], 0.7), 2); }).join('')),
+      it('Wstążka gimnastyczna', 'wstążkę gimnastyczną', 'f', [100, 120], 42, 120, 82, 0, Ln('M80 112 L92 84', '#b98a12', 4) + Cn(92, 84, 3.4, '#ffd23f', O) + Ln('M92 84 C70 70 96 46 70 40 C40 34 70 10 40 8 C20 6 14 26 30 34 C46 44 20 58 8 50', '#ff6fa8', 8) + Ln('M92 84 C70 70 96 46 70 40 C40 34 70 10 40 8 C20 6 14 26 30 34 C46 44 20 58 8 50', '#ffb3d1', 3.4), true),
+      it('Gwiazdkowa tiara', 'gwiazdkową tiarę', 'f', [96, 50], 100, 37, 70, 0, Pt('M6 44 Q48 30 90 44 L84 34 Q48 18 12 34 Z', '#e8ecff', '#8e9ae6', 3) + Pt(starD(48, 18, 15, 0.46), '#ffd23f', '#b98a12', 2.6) + Pt(starD(24, 30, 8, 0.46), '#ffe27a', '#b98a12', 2.2) + Pt(starD(72, 30, 8, 0.46), '#ffe27a', '#b98a12', 2.2) + Cn(48, 18, 3, '#ff9ec7', 0) + spark(78, 10, 5, '#fff'))
+    ], sr: { name: 'Księżycowa Baletnica' } };
+    fin(37, c37);
+    // ---------- 38: CUKIERNICZKA (specjal: Truskawkowy Tort) ----------
+    function c38(v) {
+      var fur = v ? '#ffc2d4' : '#ffcf96', f2 = v ? '#fff4f7' : '#fff4e2', ap = v ? '#fff4f7' : '#ffffff', st = v ? '#ff5a7a' : '#ff9ec7', pt = v ? '#7cd67a' : '#e8a35c';
+      var torso = R(40, 110, 120, 90, 0, v ? '#ff8fb0' : '#7cc7ff', 0) + Pt('M62 118 H138 V200 H62 Z', ap, 0) + Ln('M62 118 V200 M138 118 V200', O, 2.6) + R(62, 118, 76, 10, 0, st, 0)
+        + R(76, 150, 48, 28, 8, f2, O, 2.6) + Ln('M78 158 H122', st, 3) + (v ? Pn('M92 166 Q100 158 108 166 Q100 178 92 166 Z', '#ff5a7a') + Pn('M98 160 l2 -4 l2 4 Z', '#7cd67a') : Pn('M94 168 Q100 160 106 168 Q100 176 94 168 Z', '#ff9ec7'));
+      var spots = v ? Cn(66, 60, 2, '#fff', 0) + Cn(134, 62, 2, '#fff', 0) + Cn(118, 48, 1.6, '#fff', 0) + Cn(54, 82, 1.6, '#fff', 0) + Cn(148, 84, 1.6, '#fff', 0) : Pn('M56 52 Q74 40 90 46 Q80 66 60 70 Z', '#e8a35c') + Pn('M138 104 Q152 94 158 106 Q150 118 140 114 Z', '#e8a35c');
+      var c = baseX({ fur: fur, fur2: f2, earIn: v ? '#ff8fb0' : '#ffb8cf', torso: torso, arms: v ? '#ff8fb0' : '#7cc7ff', cuff: ap, feetC: f2, toeC: dk(fur, 0.7), mouth: 'tongue', nose: v ? '#ff5a7a' : '#ff7f9e', chest: false,
+        cheeks: v ? '#ff5a7a' : '#ff8aa5', headClip: spots, earC: v ? fur : fur,
+        headOver: v ? Pn('M86 36 Q100 24 114 36 Q108 44 100 42 Q92 44 86 36 Z', '#fff4f7') + Ln('M86 36 Q100 24 114 36', '#ffd0dc', 2) : Ln('M100 40 v12 M88 42 v10 M112 42 v10', '#e8a35c', 5) });
+      var tail = tailBand(fur, v ? '#fff4f7' : '#e8a35c', v ? '#ff5a7a' : '#fff4e2');
+      return { cat: c, tail: tail, eyes: eyesX(v ? '#ff5a7a' : '#3fae6a', { lash: v ? 1 : 0, star: v }) };
+    }
+    HERO[38] = { theme: 'Cukierniczka', items: [
+      it('Babeczka', 'babeczkę', 'f', [56, 64], 154, 166, 52, 8, Pt('M10 34 L16 60 H40 L46 34 Z', '#7cc7ff', O, 3) + Ln('M20 36 l2 22 M28 36 v22 M36 36 l-2 22', '#4f9fe0', 2.4) + Pt('M6 34 Q4 20 16 18 Q16 6 28 8 Q38 4 42 16 Q54 18 50 34 Z', '#ffc4dd', O, 3) + Ln('M14 26 q6 -4 12 0 q6 -4 12 0', '#ff9ec7', 2.4) + Cn(28, 6, 5, '#ff3b5c', O) + Ln('M28 2 q3 -4 6 -2', '#5ccf6b', 2.2) + Cn(18, 22, 1.6, '#ffe27a', 0) + Cn(38, 24, 1.6, '#7cc7ff', 0) + Cn(28, 18, 1.6, '#5ccf6b', 0)),
+      it('Wałek do ciasta', 'wałek do ciasta', 'm', [120, 34], 100, 156, 112, -6, R(4, 12, 20, 10, 5, '#c98a4b', O, 3) + R(96, 12, 20, 10, 5, '#c98a4b', O, 3) + R(22, 4, 76, 26, 12, '#f2c38b', O) + Ln('M30 10 H90', '#fff1d6', 3) + Ln('M30 23 H90', '#d9a066', 2.4)),
+      it('Czapka cukiernika', 'czapkę cukiernika', 'f', [90, 76], 100, 30, 76, 0, Pt('M16 52 Q2 46 6 30 Q8 14 26 18 Q30 2 46 6 Q62 0 68 16 Q86 14 86 32 Q88 46 74 52 Z', '#ffffff', O) + Ln('M24 30 Q30 38 28 50 M46 22 V50 M66 30 Q62 38 64 50', '#e6e2ee', 3) + R(14, 52, 62, 18, 6, '#ffffff', O) + R(14, 56, 62, 6, 0, '#ff9ec7', 0) + R(14, 52, 62, 18, 6, 'none', O)),
+      it('Rękawica kuchenna', 'rękawicę kuchenną', 'f', [56, 66], 46, 158, 40, -18, Pt('M8 52 L8 24 Q8 6 26 6 Q44 6 44 24 L44 30 Q54 26 54 36 Q54 46 44 46 L44 52 Z', '#ff9ec7', O) + R(4, 50, 44, 14, 6, '#ffffff', O, 3) + Cn(18, 24, 3, '#fff', 0) + Cn(32, 32, 3, '#fff', 0) + Cn(22, 40, 3, '#fff', 0) + Cn(34, 18, 3, '#fff', 0)),
+      it('Tort z wisienką', 'tort z wisienką', 'm', [90, 84], 150, 158, 74, 0, E(45, 78, 40, 6, '#e6e2ee', O) + Pt('M10 48 H80 V74 Q45 82 10 74 Z', '#ffe3c2', O) + Pt('M10 48 Q45 56 80 48 Q80 38 45 36 Q10 38 10 48 Z', '#ffc4dd', O) + Pt('M10 48 q6 10 12 0 q6 10 12 0 q6 10 12 0 q6 10 12 0 q6 10 12 0 q6 10 10 0', '#ffc4dd', O, 2.6) + R(10, 60, 70, 6, 0, '#ff9ec7', 0) + Ln('M45 36 V18', '#c98a4b', 3) + Pt('M45 8 Q49 14 45 18 Q41 14 45 8 Z', '#ffd23f', '#e08a00', 2) + Cn(30, 36, 6, '#ff3b5c', O) + Cn(60, 36, 6, '#ff3b5c', O) + Ln('M30 30 q4 -6 8 -6 M60 30 q4 -6 8 -6', '#5ccf6b', 2)),
+      it('Złota trzepaczka', 'złotą trzepaczkę', 'f', [50, 100], 40, 128, 38, -24, R(20, 60, 10, 36, 5, '#c98a4b', O, 3) + Pt('M25 62 Q4 40 10 18 Q16 2 25 2 Q34 2 40 18 Q46 40 25 62 Z', 'none', '#e6a400', 4) + Ln('M25 62 Q14 36 18 10 M25 62 Q36 36 32 10 M25 62 V2', '#ffd23f', 3.4) + spark(42, 10, 6, '#fff7c2') + spark(8, 40, 4, '#fff7c2'))
+    ], sr: { name: 'Truskawkowy Tort' } };
+    fin(38, c38);
+    // ---------- 39: PANI WETERYNARZ (specjal: Doktor Serduszko) ----------
+    function c39(v) {
+      var fur = v ? '#ffd0e0' : '#fffaf4', f2 = v ? '#ffffff' : '#ffffff', coat = v ? '#ffffff' : '#ffffff', sc = v ? '#ff8ab8' : '#7fdcc8', scD = v ? '#e0609a' : '#3fb8a0';
+      var torso = R(40, 110, 120, 90, 0, sc, 0) + Pt('M40 110 H82 L94 200 H40 Z', coat, 0) + Pt('M118 110 H160 V200 H106 Z', coat, 0) + Ln('M82 110 L94 200 M118 110 L106 200', O, 2.6) + Pn('M84 110 L100 132 L116 110 Z', fur)
+        + R(122, 150, 22, 18, 4, coat, O, 2.4) + Pn('M133 166 q-7 -6 -3 -10 q3 -2 3 1 q0 -3 3 -1 q4 4 -3 10 Z', '#ff5a7a') + Cn(58, 140, 2.4, scD, 0) + Cn(58, 158, 2.4, scD, 0);
+      var patches = v ? [[62, 60], [136, 58], [150, 92], [52, 92]].map(function (p) { return Pn('M' + p[0] + ' ' + (p[1] + 4) + ' q-7 -6 -3 -10 q3 -2 3 1 q0 -3 3 -1 q4 4 -3 10 Z', '#ff8ab8'); }).join('') : Pn('M50 58 Q66 38 92 44 Q86 66 62 74 Q50 72 50 58 Z', '#c98a4b') + Pn('M128 40 Q154 42 156 66 Q140 70 126 58 Z', '#3a3340');
+      var c = baseX({ fur: fur, fur2: f2, earIn: '#ffb8cf', torso: torso, arms: coat, cuff: sc, feetC: v ? '#ffffff' : '#fffaf4', toeC: '#d8c8c0', mouth: 'smile', nose: '#ff7f9e', chest: false, shadeC: v ? '#c9608f' : '#9a8a80',
+        headClip: patches, earC: fur, back: v ? En(100, 112, 96, 98, '#ff8ab8', 0.16) : '',
+        headOver: v ? spark(160, 48, 7, '#fff') + spark(36, 60, 6, '#fff') : '' });
+      return { cat: c, tail: v ? tailBand(fur, '#ff8ab8', '#ffffff') : tailBand(fur, '#c98a4b', '#3a3340'), eyes: eyesX(v ? '#ff5a9a' : '#4aa8e6', { lash: 1, star: v }) };
+    }
+    HERO[39] = { theme: 'Pani Weterynarz', items: [
+      it('Plaster w serduszka', 'plaster w serduszka', 'm', [44, 24], 146, 106, 30, -20, R(2, 4, 40, 16, 8, '#ffd9a8', O, 2.6) + R(14, 4, 16, 16, 2, '#fff1d6', 0) + Pn('M22 16 q-5 -4 -2 -7 q2 -1 2 1 q0 -2 2 -1 q3 3 -2 7 Z', '#ff5a7a') + Cn(8, 12, 1.2, '#d9a066', 0) + Cn(36, 12, 1.2, '#d9a066', 0)),
+      it('Stetoskop', 'stetoskop', 'm', [100, 80], 100, 140, 86, 0, Ln('M14 6 Q10 34 30 44 Q50 54 50 30 M86 6 Q90 34 70 44 Q50 54 50 30', '#5a5a6e', 5) + Ln('M50 44 Q48 62 62 66', '#5a5a6e', 5) + Cn(14, 6, 4, '#c0c8d8', O) + Cn(86, 6, 4, '#c0c8d8', O) + Cn(66, 68, 9, '#c0c8d8', O) + Cn(66, 68, 4.5, '#8e9ab0', 0) + spark(70, 62, 3, '#fff')),
+      it('Pluszowy zajączek', 'pluszowego zajączka', 'm', [56, 80], 154, 160, 44, 10, E(16, 18, 7, 18, '#fff0f6', O) + E(38, 18, 7, 18, '#fff0f6', O) + E(16, 18, 3, 12, '#ffc4dd') + E(38, 18, 3, 12, '#ffc4dd') + E(27, 58, 20, 18, '#fff0f6', O) + Cn(27, 38, 15, '#fff0f6', O) + Cn(22, 36, 2, O, 0) + Cn(32, 36, 2, O, 0) + E(27, 42, 2.4, 1.6, '#ff7f9e') + R(20, 48, 14, 10, 2, '#ffd9a8', O, 2) + Ln('M23 53 h8', '#ff5a7a', 2)),
+      it('Torba lekarska', 'torbę lekarską', 'f', [70, 60], 42, 170, 52, 0, Ln('M24 18 Q24 6 35 6 Q46 6 46 18', O, 5) + R(4, 18, 62, 38, 9, '#ff5a7a', O) + R(4, 18, 62, 10, 6, '#e0405e', O, 3) + R(29, 32, 12, 20, 2, '#fff', 0) + R(25, 36, 20, 12, 2, '#fff', 0)),
+      it('Lusterko na opasce', 'lusterko na opasce', 'n', [110, 60], 100, 44, 104, 0, Ln('M8 52 Q55 -8 102 52', '#5a5a6e', 6) + Cn(55, 22, 15, '#e8ecf6', O) + Cn(55, 22, 9, '#b7c3da', 0) + Cn(51, 18, 3.5, '#fff', 0)),
+      it('Złoty termometr', 'złoty termometr', 'm', [30, 90], 40, 128, 22, -30, R(9, 4, 12, 66, 6, '#fff8dc', '#b98a12', 3) + R(13, 30, 4, 40, 2, '#ff5a7a', 0) + Cn(15, 74, 10, '#ff5a7a', '#b98a12', 3) + Ln('M21 16 h4 M21 26 h4 M21 36 h4 M21 46 h4', '#b98a12', 2) + spark(24, 8, 5, '#ffe27a'))
+    ], sr: { name: 'Doktor Serduszko' } };
+    fin(39, c39);
+    // ---------- 40: MALARKA (specjal: Tęczowa Artystka) ----------
+    function c40(v) {
+      var fur = v ? '#ffffff' : '#3d3646', f2 = v ? '#fff6fb' : '#f4eef8', sm = v ? '#fff4c2' : '#8fc1ff', smD = v ? '#e6c86a' : '#5b97e6', ol = O;
+      var RB = ['#ff5a7a', '#ffc400', '#3ecf6b', '#3a9bff', '#b36bff'];
+      var dots = function (k) { return [[60, 132], [130, 150], [84, 176], [118, 124], [70, 160], [140, 182]].map(function (p, i) { return Pn('M' + p[0] + ' ' + p[1] + ' q5 -7 9 -1 q6 3 0 8 q-1 6 -7 3 q-6 1 -2 -10 Z', RB[(i + k) % 5]); }).join(''); };
+      var torso = R(40, 110, 120, 90, 0, sm, 0) + Pn('M74 110 Q100 128 126 110 Z', fur) + Ln('M74 112 Q100 128 126 112', smD, 3) + R(68, 146, 64, 40, 10, lt(sm, 0.4), O, 2.4) + dots(0) + Ln('M86 186 v-10 M112 186 v-8', smD, 3);
+      var head = v ? [[58, 60, '#ff5a7a'], [140, 56, '#3a9bff'], [150, 86, '#ffc400'], [52, 88, '#3ecf6b'], [120, 44, '#b36bff']].map(function (p) { return Cn(p[0], p[1], 5, p[2], 0) + Cn(p[0] + 7, p[1] + 4, 2.4, p[2], 0); }).join('') : Cn(140, 70, 4, '#ffc400', 0) + Cn(146, 76, 2, '#ffc400', 0) + Cn(60, 62, 3.4, '#ff5a7a', 0);
+      var c = baseX({ fur: fur, fur2: f2, earIn: '#ffb8cf', torso: torso, arms: sm, cuff: lt(sm, 0.5), feetC: v ? '#ffffff' : '#3d3646', toeC: v ? '#d8c8e0' : '#1d1830', mouth: 'open', nose: '#ff7f9e', chest: false, shadeC: v ? '#a090b8' : '#14101a',
+        muzzleC: f2, headClip: head, whisk: v ? '#a090b8' : '#d8d0e4', back: v ? En(100, 112, 96, 98, '#ffc400', 0.13) : '',
+        headOver: v ? spark(160, 50, 7, '#ffc400') + spark(36, 64, 6, '#3a9bff') + spark(170, 120, 5, '#ff5a7a') : '' });
+      var tail = v ? Ln(TD, O, 21) + Ln(TD, '#ffffff', 14) + ov(TD, '#ff5a7a', 14, 10, 8) + ov(TD, '#ffc400', 14, 10, 28) + ov(TD, '#3ecf6b', 14, 10, 48) + ov(TD, '#3a9bff', 14, 10, 68) + ov(TD, '#b36bff', 14, 10, 86) : tailBand(fur, false, '#f4eef8');
+      return { cat: c, tail: tail, eyes: eyesX(v ? '#b36bff' : '#ffc400', { lash: 0, star: v }) };
+    }
+    HERO[40] = { theme: 'Malarka', items: [
+      it('Czerwony beret', 'czerwony beret', 'm', [90, 50], 116, 40, 76, 14, Pt('M6 34 Q4 12 44 8 Q84 8 86 30 Q84 44 46 44 Q10 44 6 34 Z', '#ff5a7a', O) + Ln('M14 32 Q44 40 78 30', '#e0405e', 3) + Ln('M44 8 V0', O, 4) + Pn('M22 20 Q34 12 48 14', '#ff9ab0')),
+      it('Pędzelek', 'pędzelek', 'm', [30, 96], 156, 150, 22, 22, R(11, 34, 8, 60, 4, '#c98a4b', O, 2.6) + R(9, 26, 12, 12, 2, '#c0c8d8', O, 2.6) + Pt('M10 26 Q8 10 15 2 Q22 10 20 26 Z', '#3a9bff', O, 2.6)),
+      it('Paleta farb', 'paletę farb', 'f', [80, 62], 44, 158, 60, -10, Pt('M40 4 Q76 4 76 30 Q76 44 62 44 Q54 44 54 52 Q54 60 42 60 Q4 60 4 32 Q4 4 40 4 Z', '#f2c38b', O) + Cn(18, 44, 6, '#fff5e6', O, 2.4) + Cn(22, 22, 7, '#ff5a7a', 0) + Cn(40, 14, 7, '#ffc400', 0) + Cn(60, 20, 7, '#3ecf6b', 0) + Cn(64, 36, 6, '#3a9bff', 0) + Cn(36, 34, 6, '#b36bff', 0)),
+      it('Pudełko kredek', 'pudełko kredek', 'n', [60, 70], 150, 168, 46, 0, ['#ff5a7a', '#ffc400', '#3ecf6b', '#3a9bff', '#b36bff'].map(function (c, i) { var x = 12 + i * 9; return R(x - 3.5, 8 + (i % 2) * 6, 7, 30, 1, c, O, 2) + Pt('M' + (x - 3.5) + ' ' + (8 + (i % 2) * 6) + ' L' + x + ' ' + ((i % 2) * 6) + ' L' + (x + 3.5) + ' ' + (8 + (i % 2) * 6) + ' Z', '#f2c38b', O, 2); }).join('') + R(4, 30, 52, 36, 6, '#ffde59', O) + Ln('M10 40 H50', '#e6b800', 3) + star(30, 54, 7, '#fff', 0)),
+      it('Sztaluga z obrazkiem', 'sztalugę z obrazkiem', 'f', [90, 130], 40, 128, 72, -8, Ln('M24 30 L8 128 M66 30 L82 128 M45 30 V120', '#c98a4b', 6) + R(6, 6, 78, 66, 4, '#ffffff', O) + R(12, 12, 66, 54, 2, '#cfeaff', 0) + Pn('M12 66 Q30 42 46 56 Q60 38 78 60 V66 Z', '#7ad67a') + Cn(62, 26, 8, '#ffd23f', 0) + Pn('M24 30 q4 -6 8 0 q4 -6 8 0 q-8 6 -8 10 q0 -4 -8 -10 Z', '#ff5a7a') + R(4, 70, 82, 8, 3, '#c98a4b', O, 3), true),
+      it('Tęczowy pędzel', 'tęczowy pędzel', 'm', [70, 120], 40, 120, 54, -26, '<defs><linearGradient id="rbp" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ff5a7a"/><stop offset=".25" stop-color="#ffc400"/><stop offset=".5" stop-color="#3ecf6b"/><stop offset=".75" stop-color="#3a9bff"/><stop offset="1" stop-color="#b36bff"/></linearGradient></defs>' + R(31, 52, 9, 64, 4, '#ffd23f', '#b98a12', 2.6) + R(28, 40, 15, 14, 3, '#e8ecf6', O, 2.6) + Pt('M28 42 Q22 18 35 2 Q48 18 42 42 Z', 'url(#rbp)', O, 2.6) + spark(56, 18, 7, '#fff7c2') + spark(12, 40, 5, '#fff7c2') + Ln('M4 70 Q24 60 30 74 Q36 86 66 78', 'url(#rbp)', 5))
+    ], sr: { name: 'Tęczowa Artystka' } };
+    fin(40, c40);
+    // ---------- 41: OGRODNICZKA (specjal: Kwitnąca Wiosna) ----------
+    function c41(v) {
+      var fur = v ? '#ffd6ea' : '#c99b72', f2 = v ? '#ffffff' : '#fff1e2', str = v ? '#ffb3d6' : '#9a6c48', sh = v ? '#fff3a8' : '#ffd84a', dg = v ? '#9be3a6' : '#5cb85c', dgD = v ? '#5cb88a' : '#3e8e3e';
+      var torso = R(40, 110, 120, 90, 0, sh, 0) + Pt('M58 136 H142 V200 H58 Z', dg, 0) + Ln('M58 136 H142', O, 2.6) + Ln('M70 110 L72 138 M130 110 L128 138', dg, 7) + Cn(72, 138, 3.6, '#ffd23f', O) + Cn(128, 138, 3.6, '#ffd23f', O)
+        + R(84, 150, 32, 24, 5, lt(dg, 0.35), O, 2.4) + Pn('M100 158 l3 -4 l3 4 l-3 4 Z M94 162 l3 -4 l3 4 l-3 4 Z', '#ff6f91') + Cn(100, 162, 2, '#ffd23f', 0) + Ln('M58 136 V200 M142 136 V200', dgD, 2);
+      var stripes = v ? Pn(starD(64, 58, 6, 0.5), '#fff') + Pn(starD(140, 60, 6, 0.5), '#fff') + Cn(64, 58, 2, '#ffd23f', 0) + Cn(140, 60, 2, '#ffd23f', 0) + Cn(150, 90, 2.2, '#ff8ab8', 0) + Cn(52, 92, 2.2, '#ff8ab8', 0)
+        : Ln('M100 38 v14 M86 41 v11 M114 41 v11 M40 90 h12 M40 100 h10 M160 90 h-12 M160 100 h-10', str, 6);
+      var c = baseX({ fur: fur, fur2: f2, earIn: '#ffb8cf', torso: torso, arms: sh, cuff: lt(sh, 0.4), feetC: v ? '#9be3a6' : '#8a5a2e', toeC: v ? '#5cb88a' : '#5a3a1e', mouth: 'smile', nose: '#ff7f9e', chest: false, shadeC: v ? '#c96f9a' : '#6a4a2e',
+        headClip: stripes, back: v ? En(100, 112, 96, 98, '#9be3a6', 0.18) : '', whisk: v ? '#c96f9a' : '#6a5a52',
+        headOver: v ? spark(162, 48, 7, '#fff') + spark(34, 62, 6, '#fff') : '' });
+      var tail = v ? tailFluff(0, fur, '#ffffff', O, '#9be3a6') : tailBand(fur, str, f2);
+      return { cat: c, tail: tail, eyes: eyesX(v ? '#4cc98a' : '#6ab04c', { lash: 1, star: v }) };
+    }
+    HERO[41] = { theme: 'Ogrodniczka', items: [
+      it('Stokrotka za uchem', 'stokrotkę za uchem', 'f', [44, 44], 56, 52, 32, -10, [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) { var a = i * Math.PI / 4; return '<ellipse cx="' + (22 + Math.cos(a) * 11).toFixed(1) + '" cy="' + (22 + Math.sin(a) * 11).toFixed(1) + '" rx="7" ry="4.4" transform="rotate(' + (i * 45) + ' ' + (22 + Math.cos(a) * 11).toFixed(1) + ' ' + (22 + Math.sin(a) * 11).toFixed(1) + ')" fill="#ffffff" ' + stk(O, 2.2) + '/>'; }).join('') + Cn(22, 22, 7, '#ffd23f', O, 2.4) + Cn(20, 20, 2, '#fff7c2', 0)),
+      it('Konewka', 'konewkę', 'f', [96, 70], 152, 160, 64, 0, Pt('M20 24 H62 L66 64 H16 Z', '#59b8ff', O) + Ln('M30 24 Q40 4 52 24', O, 5) + Pt('M62 34 L92 16 L94 22 L66 46 Z', '#59b8ff', O, 3) + E(92, 18, 5, 7, '#3a9bff', O, 2.4) + Pn('M24 36 H58 V44 H24 Z', '#9fd8ff') + Pn('M38 54 q-5 -4 -2 -7 q2 -1 2 1 q0 -2 2 -1 q3 3 -2 7 Z', '#ff6f91') + Cn(96, 32, 2, '#9fd8ff', 0) + Cn(92, 40, 2, '#9fd8ff', 0)),
+      it('Łopatka', 'łopatkę', 'f', [36, 96], 44, 150, 26, -20, R(14, 4, 8, 50, 3, '#c98a4b', O, 2.6) + Pt('M8 52 H28 V72 Q28 92 18 94 Q8 92 8 72 Z', '#c0c8d8', O) + Ln('M18 58 V86', '#e8ecf6', 3)),
+      it('Doniczka z kiełkiem', 'doniczkę z kiełkiem', 'f', [56, 70], 46, 176, 42, 0, Pt('M8 34 H48 L42 66 H14 Z', '#e0805a', O) + R(4, 28, 48, 10, 3, '#f09a72', O, 3) + Ln('M28 28 V12', '#5cb85c', 4) + Pt('M28 14 Q14 2 6 12 Q16 22 28 14 Z', '#7ad67a', O, 2.4) + Pt('M28 12 Q40 0 50 8 Q42 20 28 12 Z', '#7ad67a', O, 2.4) + Pn('M24 50 q-4 -3 -2 -6 q2 -1 2 1 q0 -2 2 -1 q3 3 -2 6 Z', '#fff')),
+      it('Biedronka', 'biedronkę', 'f', [44, 40], 134, 124, 26, 16, E(22, 24, 18, 14, '#ff3b3b', O) + Ln('M22 10 V38', O, 2.4) + Cn(14, 20, 3.4, O, 0) + Cn(30, 20, 3.4, O, 0) + Cn(13, 31, 2.8, O, 0) + Cn(31, 31, 2.8, O, 0) + Pt('M10 12 Q22 2 34 12 Q22 18 10 12 Z', '#2a2433', O, 2) + Cn(17, 9, 1.6, '#fff', 0) + Cn(27, 9, 1.6, '#fff', 0) + Ln('M16 6 l-4 -5 M28 6 l4 -5', O, 2)),
+      it('Słomkowy kapelusz', 'słomkowy kapelusz', 'm', [130, 64], 100, 40, 118, 0, E(65, 46, 62, 14, '#f2d27a', O) + Pt('M32 46 Q32 8 65 8 Q98 8 98 46 Z', '#f2d27a', O) + Ln('M14 46 Q65 60 116 46 M42 26 H88 M38 36 H92', '#d9b350', 2.4) + Pt('M32 40 Q65 50 98 40 L98 32 Q65 42 32 32 Z', '#ff8ab8', O, 2.6) + [[82, 34, '#ff6f91'], [92, 30, '#ffffff'], [74, 30, '#ffd23f']].map(function (p) { return Cn(p[0], p[1], 6, p[2], O, 2.2) + Cn(p[0], p[1], 2, '#ffd23f', 0); }).join('') + Pt('M96 32 Q108 24 110 34 Q102 38 96 32 Z', '#7ad67a', O, 2))
+    ], sr: { name: 'Kwitnąca Wiosna' } };
+    fin(41, c41);
+    // ---------- 42: STRAŻAK (specjal: Złoty Strażak) ----------
+    function c42(v) {
+      var fur = v ? '#fff3d6' : '#a3a9b5', f2 = v ? '#ffffff' : '#eef0f4', jk = v ? '#ffd23f' : '#3d4a5c', ref = v ? '#ffffff' : '#d4ff3d', refB = v ? '#e6b800' : '#c0c8d8';
+      var torso = R(40, 110, 120, 90, 0, jk, 0) + Pn('M78 110 L100 130 L122 110 Z', fur) + R(40, 156, 120, 9, 0, ref, 0) + R(40, 165, 120, 4, 0, refB, 0) + R(40, 180, 120, 7, 0, '#ff8a3d', 0)
+        + Ln('M100 130 V200', O, 2.6) + Cn(92, 142, 2.6, refB, 0) + Cn(92, 176, 2.6, refB, 0) + R(110, 128, 18, 12, 3, '#ff3b3b', O, 2) + (v ? spark(70, 136, 5, '#fff') : '');
+      var mark = v ? Cn(64, 60, 2, '#ffd23f', 0) + Cn(140, 58, 2, '#ffd23f', 0) + Cn(150, 90, 1.6, '#ffd23f', 0) : Ln('M100 38 v15 M86 41 v12 M114 41 v12', '#7a808c', 6) + Pn('M120 96 Q146 84 160 98 Q150 116 128 110 Z', '#eef0f4');
+      var c = baseX({ fur: fur, fur2: f2, earIn: '#ffb8cf', torso: torso, arms: jk, cuff: ref, feetC: v ? '#ffd23f' : '#2a2433', toeC: v ? '#b98a12' : '#5a5a6e', mouth: 'smile', nose: '#ff7f9e', chest: false, shadeC: v ? '#c9a24e' : '#4a4f5a',
+        headClip: mark, back: v ? En(100, 112, 98, 100, '#ffd23f', 0.2) : '', whisk: v ? '#c9a24e' : '#5a5f6a',
+        headOver: v ? spark(162, 48, 8, '#fff7c2') + spark(34, 62, 6, '#fff7c2') + spark(172, 124, 5, '#fff7c2') : '' });
+      return { cat: c, tail: v ? tailBand(fur, '#ffd23f', '#ffffff') : tailBand(fur, '#7a808c', '#eef0f4'), eyes: eyesX(v ? '#ffb000' : '#3a9bff', { lash: 0, star: v }) };
+    }
+    HERO[42] = { theme: 'Strażak', items: [
+      it('Megafon', 'megafon', 'm', [72, 52], 156, 150, 52, -14, Pt('M10 18 H26 L60 4 V48 L26 34 H10 Z', '#ff3b3b', O) + E(60, 26, 8, 22, '#ffffff', O, 3) + R(16, 34, 10, 14, 3, '#2a2433', O, 2.4) + Ln('M66 14 q6 12 0 24', '#ffd23f', 3)),
+      it('Gaśnica', 'gaśnicę', 'f', [46, 84], 42, 164, 34, 0, R(8, 20, 30, 60, 12, '#ff3b3b', O) + R(10, 40, 26, 14, 2, '#ffffff', 0) + Pn('M18 44 h10 v6 h-10 Z', '#ff3b3b') + R(16, 10, 14, 12, 3, '#2a2433', O, 2.6) + Ln('M30 14 Q44 14 42 34', O, 4) + Ln('M14 12 H6', O, 4) + Ln('M14 26 Q16 22 20 24', '#ff8a8a', 3)),
+      it('Wąż strażacki', 'wąż strażacki', 'm', [120, 70], 52, 176, 80, 0, Ln('M8 40 Q30 66 60 50 Q90 34 112 58', '#ffd23f', 12) + Ln('M8 40 Q30 66 60 50 Q90 34 112 58', '#e6b800', 4) + R(104, 50, 14, 16, 3, '#c0c8d8', O, 2.6) + Pt('M116 52 L124 48 V68 L116 64 Z', '#c0c8d8', O, 2.4)),
+      it('Piesek w łatki', 'pieska w łatki', 'm', [70, 70], 154, 166, 54, 0, E(35, 52, 22, 16, '#ffffff', O) + Cn(35, 30, 17, '#ffffff', O) + Pt('M20 22 Q8 22 10 40 Q18 38 22 30 Z', '#2a2433', O, 2.4) + Pt('M50 22 Q62 22 60 40 Q52 38 48 30 Z', '#2a2433', O, 2.4) + Cn(28, 30, 2.4, O, 0) + Cn(42, 30, 2.4, O, 0) + E(35, 38, 4, 3, '#2a2433') + Ln('M31 44 Q35 47 39 44', O, 2) + Cn(26, 52, 3, '#2a2433', 0) + Cn(44, 58, 3.6, '#2a2433', 0) + Cn(36, 20, 2.4, '#2a2433', 0) + R(24, 44, 22, 5, 2, '#ff3b3b', O, 1.8)),
+      it('Hełm strażacki', 'hełm strażacki', 'm', [120, 72], 100, 38, 110, 0, Pt('M6 56 Q60 44 114 56 Q114 66 60 62 Q6 66 6 56 Z', '#e0302f', O) + Pt('M22 54 Q22 10 60 8 Q98 10 98 54 Z', '#ff3b3b', O) + Ln('M60 8 V50', '#c92a2a', 5) + Pt('M46 22 H74 V46 Q60 52 46 46 Z', '#ffd23f', '#b98a12', 3) + Pt(starD(60, 33, 8, 0.45), '#ffffff', 0) + Ln('M30 24 Q36 14 48 12', '#ff8a8a', 3)),
+      it('Złota odznaka', 'złotą odznakę', 'f', [50, 54], 74, 142, 26, 0, Pt('M25 2 L32 10 L44 10 L44 22 L48 30 L40 38 L40 50 L25 46 L10 50 L10 38 L2 30 L6 22 L6 10 L18 10 Z', '#ffd23f', '#b98a12', 2.6) + Cn(25, 27, 10, '#ffe27a', '#b98a12', 2) + Pt(starD(25, 27, 6, 0.45), '#ff3b3b', 0) + spark(40, 8, 5, '#fff'))
+    ], sr: { name: 'Złoty Strażak' } };
+    fin(42, c42);
+    // ---------- 43: ŚPIOSZEK (specjal: Gwiezdny Śpioszek) ----------
+    function c43(v) {
+      var fur = v ? '#2e3570' : '#f6e3c0', f2 = v ? '#5a64a8' : '#fffaf0', pj = v ? '#4b55a8' : '#a9d4ff', pjL = v ? '#ffe27a' : '#ffffff', pjD = v ? '#2e3570' : '#6aa8e6';
+      var deco = function (x, y, k) { return k % 2 ? Pn('M' + x + ' ' + (y - 6) + ' a7 7 0 1 0 6 10 a5.5 5.5 0 1 1 -6 -10 Z', pjL) : Pn(starD(x, y, 6, 0.46), pjL); };
+      var torso = R(40, 110, 120, 90, 0, pj, 0) + [[62, 136], [92, 128], [124, 140], [72, 166], [108, 160], [138, 172], [86, 190]].map(function (p, i) { return deco(p[0], p[1], i); }).join('') + Ln('M100 116 V200', pjD, 2.4) + Cn(100, 132, 3, pjL, pjD) + Cn(100, 152, 3, pjL, pjD) + Cn(100, 172, 3, pjL, pjD);
+      var c = baseX({ fur: fur, fur2: f2, earIn: v ? '#8e9ae6' : '#ffc4dd', torso: torso, arms: pj, cuff: pjL, feetC: pj, toeC: pjD, mouth: 'smile', nose: v ? '#ff9ec7' : '#ff7f9e', chest: false, shadeC: v ? '#14183a' : '#a0845a',
+        headClip: v ? Cn(66, 58, 1.8, '#ffe27a', 0) + Cn(138, 60, 2.2, '#ffe27a', 0) + Cn(122, 46, 1.4, '#fff', 0) + Cn(52, 82, 1.4, '#fff', 0) + Cn(150, 86, 1.6, '#ffe27a', 0) : Pn('M58 50 Q72 40 88 44 Q78 58 62 60 Z', '#e8c896'),
+        cheeks: v ? '#8e9ae6' : '#ff8aa5', whisk: v ? '#8e9ae6' : '#a08a70', back: v ? En(100, 112, 96, 98, '#5a64a8', 0.22) : '',
+        headOver: v ? spark(160, 50, 7, '#ffe27a') + spark(36, 64, 6, '#ffe27a') + spark(170, 120, 5, '#fff') : '' });
+      return { cat: c, tail: v ? tailFluff(0, fur, '#5a64a8', O, '#ffe27a') : tailFluff(0, fur, '#fffaf0', O, '#e8c896'), eyes: eyesX(v ? '#ffd23f' : '#8a6bd0', { lash: 1, star: v }) };
+    }
+    HERO[43] = { theme: 'Śpioszek', items: [
+      it('Szlafmyca', 'szlafmycę', 'f', [110, 84], 112, 34, 96, 0, Pt('M6 66 Q50 54 92 62 Q80 30 64 16 Q46 4 30 18 Q18 32 6 66 Z', '#a9d4ff', O) + Ln('M30 18 Q60 8 92 40 Q100 52 96 62', '#a9d4ff', 0.1) + Pt('M64 16 Q90 10 98 36 L92 40 Q86 22 64 22 Z', '#a9d4ff', O, 3) + R(4, 60, 92, 14, 7, '#ffffff', O) + Cn(98, 42, 10, '#ffffff', O) + Pn(starD(42, 36, 6, 0.46), '#ffe27a') + Pn(starD(66, 44, 5, 0.46), '#ffe27a')),
+      it('Kubek mleka', 'kubek mleka', 'm', [56, 56], 156, 162, 42, 0, R(6, 14, 36, 38, 7, '#ff9ec7', O) + Ln('M42 22 Q54 22 54 32 Q54 42 42 42', O, 4) + E(24, 15, 17, 4, '#ffffff', O, 2.4) + Pn('M18 34 q-5 -4 -2 -7 q2 -1 2 1 q0 -2 2 -1 q3 3 -2 7 Z', '#fff') + Ln('M18 8 q-4 -4 0 -8 M28 8 q-4 -4 0 -8', '#c0c8d8', 2.4)),
+      it('Pluszowy miś', 'pluszowego misia', 'm', [64, 74], 44, 162, 48, -8, Cn(14, 14, 8, '#c98a4b', O) + Cn(50, 14, 8, '#c98a4b', O) + Cn(14, 14, 3.6, '#f2c38b', 0) + Cn(50, 14, 3.6, '#f2c38b', 0) + E(32, 56, 22, 16, '#c98a4b', O) + Cn(32, 30, 19, '#c98a4b', O) + E(32, 38, 8, 6, '#f2c38b') + Cn(25, 27, 2.4, O, 0) + Cn(39, 27, 2.4, O, 0) + E(32, 35, 3, 2.2, O) + E(32, 58, 10, 8, '#f2c38b') + Pt('M26 46 L32 50 L38 46 L38 54 L32 50 L26 54 Z', '#ff6f91', O, 1.8)),
+      it('Poduszka', 'poduszkę', 'f', [96, 62], 100, 128, 176, 0, Pt('M8 10 Q48 2 88 10 Q96 30 88 52 Q48 60 8 52 Q0 30 8 10 Z', '#ffffff', O) + Ln('M14 16 Q48 10 82 16', '#e6e2ee', 3) + Pn(starD(30, 32, 6, 0.46), '#a9d4ff') + Pn('M62 26 a7 7 0 1 0 6 10 a5.5 5.5 0 1 1 -6 -10 Z', '#ffd23f') + Cn(48, 40, 2, '#ff9ec7', 0), true),
+      it('Lampka księżyc', 'lampkę księżyc', 'f', [60, 84], 40, 128, 40, 0, Pt('M40 8 a26 26 0 1 0 16 44 a20 20 0 1 1 -16 -44 Z', '#ffe27a', '#e6b800', 3) + Cn(24, 30, 3, '#ffd23f', 0) + Cn(34, 46, 2, '#ffd23f', 0) + Ln('M28 54 V72', O, 4) + R(14, 72, 28, 10, 4, '#a9d4ff', O, 3) + spark(50, 18, 5, '#fff7c2')),
+      it('Senna chmurka', 'senną chmurkę', 'f', [110, 70], 150, 22, 82, 0, Pt('M18 56 Q2 56 4 42 Q6 30 20 32 Q22 12 42 14 Q54 2 70 12 Q90 8 94 26 Q108 30 106 44 Q104 58 88 56 Z', '#ffffff', '#a9b8e0', 3.4) + '<text x="34" y="46" font-family="Arial Black,Arial" font-weight="900" font-size="20" fill="#8e9ae6">Z</text><text x="54" y="40" font-family="Arial Black,Arial" font-weight="900" font-size="15" fill="#a9b8e0">z</text><text x="70" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="11" fill="#c4cdf0">z</text>' + Pn(starD(88, 16, 6, 0.46), '#ffe27a'))
+    ], sr: { name: 'Gwiezdny Śpioszek' } };
+    fin(43, c43);
+    // ---------- 44: GWIAZDA ROCKA (specjal: Neonowa Gwiazda) ----------
+    function c44(v) {
+      var fur = v ? '#2a2440' : '#d98a62', f2 = v ? '#4a3f70' : '#fff1e6', jk = v ? '#14101e' : '#2f2a3a', tee = v ? '#2dfcff' : '#ff5a9a', neo = v ? '#ff3df2' : '#ffd23f';
+      var torso = R(40, 110, 120, 90, 0, jk, 0) + Pt('M80 110 H120 V200 H80 Z', tee, 0) + Pn(starD(100, 154, 13, 0.45), v ? '#ff3df2' : '#ffffff') + Ln('M80 110 L74 200 M120 110 L126 200', '#6a6478', 2.4) + Pt('M80 110 L64 132 L78 136 Z', '#3f3a4c', O, 2.4) + Pt('M120 110 L136 132 L122 136 Z', '#3f3a4c', O, 2.4)
+        + [[56, 150], [56, 166], [144, 150], [144, 166]].map(function (p) { return Pn('M' + p[0] + ' ' + (p[1] - 4) + ' l4 4 l-4 4 l-4 -4 Z', '#c0c8d8'); }).join('') + (v ? Ln('M40 196 H160', '#ff3df2', 3) : '');
+      var stripe = v ? Pn('M90 38 L100 60 L96 44 L110 40 Z', '#2dfcff') + Cn(60, 62, 2, '#ff3df2', 0) + Cn(140, 60, 2, '#2dfcff', 0) : Pn('M88 38 Q100 30 112 38 L106 58 L100 46 L94 58 Z', '#b86a44');
+      var c = baseX({ fur: fur, fur2: f2, earIn: v ? '#ff3df2' : '#ffb8cf', torso: torso, arms: jk, cuff: '#3f3a4c', feetC: v ? '#2dfcff' : '#ffffff', toeC: v ? '#ff3df2' : '#ff5a9a', mouth: 'open', nose: v ? '#ff3df2' : '#ff7f9e', chest: false, shadeC: v ? '#0a0614' : '#8a4a2e',
+        headClip: stripe, whisk: v ? '#2dfcff' : '#8a5a42', cheeks: v ? '#ff3df2' : '#ff8aa5', back: v ? En(100, 112, 98, 100, '#ff3df2', 0.16) + En(100, 112, 70, 72, '#2dfcff', 0.12) : '',
+        headOver: v ? spark(162, 46, 8, '#2dfcff') + spark(34, 60, 7, '#ff3df2') + spark(172, 120, 5, '#2dfcff') : '' });
+      var tail = v ? Ln(TD, '#ff3df2', 23) + Ln(TD, fur, 14) + ov(TD, '#2dfcff', 14, 12, 60) : tailBand(fur, '#b86a44', f2);
+      return { cat: c, tail: tail, eyes: eyesX(v ? '#2dfcff' : '#3fae6a', { lash: 0, star: true }) };
+    }
+    HERO[44] = { theme: 'Gwiazda Rocka', items: [
+      it('Okulary gwiazdki', 'okulary gwiazdki', 'p', [130, 46], 100, 92, 112, 0, Pt(starD(32, 24, 22, 0.55), '#ff5a9a', O, 3) + Pt(starD(98, 24, 22, 0.55), '#ff5a9a', O, 3) + Pn(starD(32, 24, 13, 0.55), '#7a2a5a') + Pn(starD(98, 24, 13, 0.55), '#7a2a5a') + Ln('M52 22 Q65 16 78 22', O, 3.4) + Cn(26, 18, 3, '#fff', 0) + Cn(92, 18, 3, '#fff', 0)),
+      it('Mikrofon', 'mikrofon', 'm', [36, 90], 156, 140, 26, 20, R(13, 30, 10, 54, 5, '#2f2a3a', O, 3) + Cn(18, 18, 15, '#c0c8d8', O) + Ln('M8 12 H28 M6 20 H30 M8 28 H28', '#8e9ab0', 2) + Cn(13, 12, 3, '#fff', 0) + R(10, 34, 16, 6, 2, '#ffd23f', O, 2)),
+      it('Bransoletki z ćwiekami', 'bransoletki z ćwiekami', 'p', [130, 30], 100, 164, 108, 0, pair(R(4, 6, 30, 16, 6, '#2f2a3a', O, 3) + Pn('M10 10 l3 4 l-3 4 l-3 -4 Z M20 10 l3 4 l-3 4 l-3 -4 Z M30 10 l2 4 l-2 4 l-3 -4 Z', '#c0c8d8'), 130)),
+      it('Gitara', 'gitarę', 'f', [80, 130], 46, 146, 76, -22, R(36, 4, 10, 66, 3, '#c98a4b', O, 3) + R(32, 0, 18, 12, 3, '#2f2a3a', O, 2.4) + Ln('M38 4 h-4 M44 4 h4 M38 8 h-4 M44 8 h4', O, 2) + Pt('M40 64 Q14 58 10 82 Q4 100 18 110 Q14 126 40 126 Q66 126 62 110 Q76 100 70 82 Q66 58 40 64 Z', '#ff5a9a', O) + Pn('M40 70 Q22 70 20 86 Q16 100 26 106 Q24 118 40 118 Q30 100 40 70 Z', '#ff8ab8') + R(30, 96, 20, 8, 2, '#2f2a3a', 0) + Pn(starD(48, 84, 7, 0.45), '#ffd23f') + Ln('M38 8 V100 M42 8 V100', '#e8ecf6', 1.2)),
+      it('Wzmacniacz', 'wzmacniacz', 'm', [64, 64], 154, 178, 48, 0, R(4, 4, 56, 56, 6, '#2f2a3a', O) + R(4, 4, 56, 12, 4, '#3f3a4c', O, 3) + Cn(14, 10, 2.4, '#ffd23f', 0) + Cn(24, 10, 2.4, '#ffd23f', 0) + Cn(34, 10, 2.4, '#ff5a9a', 0) + Cn(32, 38, 16, '#4a4458', O, 3) + Cn(32, 38, 8, '#2f2a3a', 0) + Ln('M24 30 l16 16 M40 30 l-16 16', '#5a5468', 1.6)),
+      it('Złota płyta', 'złotą płytę', 'f', [70, 70], 158, 70, 50, -10, Cn(35, 35, 31, '#ffd23f', '#b98a12', 3) + Cn(35, 35, 24, 'none', '#e6b800', 1.6) + Cn(35, 35, 17, 'none', '#e6b800', 1.6) + Cn(35, 35, 9, '#ff5a9a', '#b98a12', 2) + Cn(35, 35, 2.4, '#2f2a3a', 0) + Ln('M16 20 Q22 12 32 10', '#fff7c2', 4) + spark(58, 10, 6, '#fff'), true)
+    ], sr: { name: 'Neonowa Gwiazda' } };
+    fin(44, c44);
+    // ---------- 45: DETEKTYW (specjal: Nocny Detektyw) ----------
+    function c45(v) {
+      var fur = v ? '#4a3a6e' : '#f2e2c8', f2 = v ? '#7a68a8' : '#fffaf0', pt = v ? '#241a3a' : '#7a5236', coat = v ? '#2a2240' : '#d9b27a', coatD = v ? '#14101e' : '#a87f48';
+      var torso = R(40, 110, 120, 90, 0, coat, 0) + Pt('M84 110 L100 140 L116 110 Z', '#ffffff', 0) + Pt('M92 112 L100 124 L108 112 Z', v ? '#b36bff' : '#5a7ad6', 0)
+        + Pt('M84 110 L72 148 L100 140 Z', lt(coat, 0.18), O, 2.4) + Pt('M116 110 L128 148 L100 140 Z', lt(coat, 0.18), O, 2.4) + R(40, 160, 120, 10, 0, coatD, 0) + R(92, 158, 16, 14, 3, '#ffd23f', O, 2.2)
+        + Cn(86, 180, 2.8, coatD, 0) + Cn(114, 180, 2.8, coatD, 0) + R(48, 174, 22, 4, 1, coatD, 0) + R(130, 174, 22, 4, 1, coatD, 0);
+      var pts = Pn('M100 120 Q78 120 76 108 Q86 100 100 104 Q114 100 124 108 Q122 120 100 120 Z', pt) + (v ? Cn(66, 60, 1.8, '#fff', 0) + Cn(138, 62, 2, '#fff', 0) : '');
+      var c = baseX({ fur: fur, fur2: f2, earIn: v ? '#b36bff' : '#ffb8cf', earC: pt, torso: torso, arms: coat, cuff: coatD, feetC: pt, toeC: v ? '#7a68a8' : '#3a2416', mouth: 'smile', nose: v ? '#ff9ec7' : '#2a1a10', chest: false, shadeC: v ? '#14101e' : '#a08060',
+        muzzleC: v ? '#7a68a8' : '#e8d2b0', headClip: pts, whisk: v ? '#b8a8e0' : '#f2e2c8', cheeks: v ? '#b36bff' : '#ff8aa5', back: v ? En(100, 112, 98, 100, '#b36bff', 0.14) : '',
+        headOver: v ? Pn('M150 40 a10 10 0 1 0 12 -12 a8 8 0 1 1 -12 12 Z', '#fff4c2') + spark(36, 62, 6, '#fff') : '' });
+      return { cat: c, tail: v ? tailBand(fur, '#241a3a', '#7a68a8') : tailBand(fur, false, pt), eyes: eyesX(v ? '#ffd23f' : '#4aa8e6', { lash: 0, star: v }) };
+    }
+    HERO[45] = { theme: 'Detektyw', items: [
+      it('Lupa', 'lupę', 'f', [64, 96], 156, 140, 46, 24, R(26, 54, 12, 40, 5, '#7a5236', O, 3) + Cn(32, 30, 26, '#ffd23f', '#b98a12', 3) + Cn(32, 30, 19, '#d6f0ff', O, 2.6) + Ln('M20 22 Q24 14 34 12', '#ffffff', 4) + Pn('M28 36 q-4 -6 0 -9 q4 -2 4 2 q2 -5 6 -2 q3 5 -4 9 Z', '#7ad6ff')),
+      it('Muszka', 'muszkę', 'f', [60, 30], 100, 124, 40, 0, Pt('M30 15 L6 4 Q2 15 6 26 Z', '#ff3b5c', O, 2.8) + Pt('M30 15 L54 4 Q58 15 54 26 Z', '#ff3b5c', O, 2.8) + Cn(30, 15, 5, '#c92a44', O, 2.4) + Cn(14, 12, 1.6, '#fff', 0) + Cn(46, 12, 1.6, '#fff', 0) + Cn(14, 19, 1.6, '#fff', 0) + Cn(46, 19, 1.6, '#fff', 0)),
+      it('Notesik', 'notesik', 'm', [56, 64], 44, 166, 40, -10, R(6, 6, 42, 54, 5, '#ff9ec7', O) + R(6, 6, 10, 54, 3, '#e0609a', O, 2.4) + R(20, 16, 22, 34, 2, '#fff', 0) + Ln('M23 22 h16 M23 30 h16 M23 38 h12', '#c0c8d8', 2) + Ln('M40 2 L54 38', '#ffd23f', 5) + Pt('M50 34 L56 46 L48 40 Z', '#f2c38b', O, 2)),
+      it('Latarka', 'latarkę', 'f', [50, 84], 40, 130, 32, -30, R(16, 30, 18, 50, 5, '#3a9bff', O) + Pt('M10 10 H40 L34 32 H16 Z', '#c0c8d8', O) + E(25, 10, 15, 5, '#fff7a8', O, 2.4) + R(20, 46, 10, 8, 2, '#ffd23f', O, 2) + '<path d="M10 8 L0 -20 H50 L40 8 Z" fill="#fff7a8" opacity=".55"/>'),
+      it('Kapelusz detektywa', 'kapelusz detektywa', 'm', [120, 66], 100, 36, 110, -4, E(60, 52, 56, 12, '#8a6440', O) + Pt('M26 52 Q24 12 60 10 Q96 12 94 52 Z', '#a87f48', O) + Pn('M44 14 Q60 26 76 14 Q72 22 60 24 Q48 22 44 14 Z', '#8a6440') + R(26, 38, 68, 12, 0, '#3a2416', 0) + Pt('M26 52 Q24 12 60 10 Q96 12 94 52 Z', 'none', O) + Pt('M78 36 Q92 22 98 36 Q90 42 80 44 Z', '#ff5a7a', O, 2.4)),
+      it('Złoty klucz', 'złoty klucz', 'm', [44, 96], 156, 168, 30, 16, Cn(22, 18, 15, '#ffd23f', '#b98a12', 3) + Cn(22, 18, 6, '#fff7f0', '#b98a12', 2.4) + R(18, 32, 8, 58, 3, '#ffd23f', '#b98a12', 2.6) + R(26, 70, 12, 6, 1, '#ffd23f', '#b98a12', 2.2) + R(26, 80, 9, 6, 1, '#ffd23f', '#b98a12', 2.2) + spark(36, 6, 5, '#fff'))
+    ], sr: { name: 'Nocny Detektyw' } };
+    fin(45, c45);
+    // ---------- 46: PSZCZÓŁKA (specjal: Królowa Pszczół) ----------
+    function c46(v) {
+      var fur = v ? '#ffe9a8' : '#f4f2f8', f2 = v ? '#fff8e0' : '#ffffff', y = v ? '#ffcf3a' : '#ffd84a', bk = v ? '#8a5a12' : '#3a3340';
+      var torso = R(40, 110, 120, 90, 0, y, 0) + R(40, 132, 120, 14, 0, bk, 0) + R(40, 160, 120, 14, 0, bk, 0) + R(40, 188, 120, 14, 0, bk, 0) + Ln('M58 120 Q70 116 78 122', '#fff7c2', 3.4) + (v ? spark(126, 124, 4, '#fff') + spark(70, 152, 3.4, '#fff') : '');
+      var patch = v ? Pt(starD(100, 46, 9, 0.46), '#ffd23f', 0) + Cn(64, 60, 2, '#fff', 0) + Cn(138, 58, 2, '#fff', 0) : Pn('M120 40 Q148 42 154 70 Q136 70 124 58 Z', '#a8a2b8') + Pn('M54 94 Q44 106 50 118 Q60 112 64 100 Z', '#a8a2b8');
+      var c = baseX({ fur: fur, fur2: f2, earIn: '#ffb8cf', torso: torso, arms: y, cuff: bk, feetC: bk, toeC: v ? '#ffd23f' : '#6a6478', mouth: 'tongue', nose: '#ff7f9e', chest: false, shadeC: v ? '#c9962a' : '#8a84a0',
+        headClip: patch, cheeks: v ? '#ff9a5a' : '#ff8aa5', whisk: v ? '#c9962a' : '#8a84a0', back: v ? En(100, 112, 98, 100, '#ffd23f', 0.22) : '',
+        headOver: v ? spark(162, 50, 8, '#fff7c2') + spark(34, 64, 6, '#fff7c2') + spark(170, 122, 5, '#fff') : '' });
+      var tail = v ? Ln(TD, O, 21) + Ln(TD, '#ffcf3a', 14) + ov(TD, '#8a5a12', 14, 12, 18) + ov(TD, '#8a5a12', 14, 12, 50) + ov(TD, '#8a5a12', 14, 12, 82) : Ln(TD, O, 21) + Ln(TD, '#ffd84a', 14) + ov(TD, '#3a3340', 14, 12, 18) + ov(TD, '#3a3340', 14, 12, 50) + ov(TD, '#3a3340', 14, 12, 82);
+      return { cat: c, tail: tail, eyes: eyesX(v ? '#ff9a2a' : '#c08a2a', { lash: 1, star: v }) };
+    }
+    HERO[46] = { theme: 'Pszczółka', items: [
+      it('Czułki', 'czułki', 'p', [110, 56], 100, 26, 96, 0, Ln('M40 54 Q34 30 18 16 M70 54 Q76 30 92 16', O, 4) + Cn(16, 14, 10, '#3a3340', O, 3) + Cn(94, 14, 10, '#3a3340', O, 3) + Cn(13, 10, 3, '#fff', 0) + Cn(91, 10, 3, '#fff', 0) + Pt('M30 54 Q55 44 80 54 L80 60 Q55 50 30 60 Z', '#ffd84a', O, 2.4)),
+      it('Skrzydełka', 'skrzydełka', 'p', [210, 110], 100, 116, 232, 0, pair(Pt('M100 64 Q60 6 22 18 Q2 36 26 62 Q48 80 100 70 Z', '#e8f6ff', '#8fc8ec', 3) + Pt('M100 74 Q56 76 34 98 Q38 110 60 104 Q84 96 100 80 Z', '#e8f6ff', '#8fc8ec', 3) + Ln('M90 64 Q60 30 30 30 M90 76 Q60 90 44 98', '#bfe4ff', 2.4) + '<ellipse cx="48" cy="34" rx="14" ry="6" fill="#fff" opacity=".7" transform="rotate(-20 48 34)"/>', 210), true),
+      it('Słoik miodu', 'słoik miodu', 'm', [60, 70], 154, 164, 46, 0, Pt('M8 22 H52 V58 Q52 66 44 66 H16 Q8 66 8 58 Z', '#ffbf3a', O) + R(6, 12, 48, 12, 4, '#c98a4b', O, 3) + R(14, 32, 32, 22, 4, '#fff7e0', O, 2.4) + Pn('M30 38 q-5 -4 -2 -7 q2 -1 2 1 q0 -2 2 -1 q3 3 -2 7 Z', '#ff9ec7') + Ln('M14 46 Q16 40 18 48 Q20 54 22 46', '#e69a12', 0.1) + Pn('M8 22 Q14 34 20 24 Q26 34 32 24 Q38 34 44 24 Q50 34 52 22 Z', '#ffbf3a') + Ln('M14 28 V40', '#ffe27a', 3)),
+      it('Słonecznik', 'słonecznik', 'm', [56, 110], 44, 150, 40, -12, Ln('M28 50 V108', '#5cb85c', 5) + Pt('M28 82 Q12 72 6 82 Q16 92 28 86 Z', '#7ad67a', O, 2.4) + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(function (i) { var a = i * Math.PI / 6, x = 28 + Math.cos(a) * 15, yy = 28 + Math.sin(a) * 15; return '<ellipse cx="' + x.toFixed(1) + '" cy="' + yy.toFixed(1) + '" rx="9" ry="4.4" transform="rotate(' + (i * 30) + ' ' + x.toFixed(1) + ' ' + yy.toFixed(1) + ')" fill="#ffd23f" ' + stk('#e6a400', 2) + '/>'; }).join('') + Cn(28, 28, 11, '#8a5a2e', O, 2.6) + Cn(25, 25, 1.4, '#c98a4b', 0) + Cn(31, 27, 1.4, '#c98a4b', 0) + Cn(27, 32, 1.4, '#c98a4b', 0)),
+      it('Plaster miodu', 'plaster miodu', 'm', [70, 62], 156, 110, 54, 10, [[18, 18], [40, 18], [62, 18], [29, 37], [51, 37], [40, 56]].map(function (p) { var s = '', i, a; for (i = 0; i < 6; i++) { a = Math.PI / 6 + i * Math.PI / 3; s += (i ? 'L' : 'M') + (p[0] + Math.cos(a) * 11).toFixed(1) + ' ' + (p[1] + Math.sin(a) * 11).toFixed(1); } return Pt(s + 'Z', '#ffbf3a', '#c98a12', 2.4) + Cn(p[0] - 3, p[1] - 3, 2.2, '#ffe27a', 0); }).join('') + Pn('M54 46 Q56 56 52 60 Q48 56 50 46 Z', '#ffbf3a')),
+      it('Korona królowej', 'koronę królowej', 'f', [90, 60], 100, 36, 62, 0, Pt('M8 54 L6 18 L26 34 L45 6 L64 34 L84 18 L82 54 Z', '#ffd23f', '#b98a12') + R(6, 46, 78, 10, 3, '#ffbf3a', '#b98a12', 2.6) + Cn(45, 6, 5, '#ff9ec7', '#b98a12', 2) + Cn(6, 16, 4, '#ff9ec7', '#b98a12', 2) + Cn(84, 16, 4, '#ff9ec7', '#b98a12', 2) + Pn('M45 30 q-6 -5 -2 -9 q2 -1 2 1 q0 -2 2 -1 q4 4 -2 9 Z', '#ff5a7a') + Ln('M16 30 Q22 24 30 30', '#fff7c2', 3) + spark(70, 30, 4, '#fff'))
+    ], sr: { name: 'Królowa Pszczół' } };
+    fin(46, c46);
+    // ---------- 47: KOWBOJKA (specjal: Srebrna Szeryf) ----------
+    function c47(v) {
+      var fur = v ? '#e8ecf4' : '#c9a07a', f2 = v ? '#ffffff' : '#fff4e6', sh = v ? '#8fa8d8' : '#6f9fd8', vest = v ? '#4a5a8a' : '#a0623a', fr = v ? '#c0c8d8' : '#d9965a';
+      var fringe = function (x0, x1) { var s = '', x; for (x = x0; x <= x1; x += 6) s += 'M' + x + ' 186 v10'; return Ln(s, fr, 3); };
+      var torso = R(40, 110, 120, 90, 0, sh, 0) + Pn('M84 110 L100 128 L116 110 Z', fur) + Pt('M40 110 H84 L90 186 H40 Z', vest, 0) + Pt('M160 110 H116 L110 186 H160 Z', vest, 0) + Ln('M84 110 L90 186 M116 110 L110 186', O, 2.6) + fringe(44, 86) + fringe(114, 156)
+        + Ln('M100 132 V200', lt(sh, -0.2) === sh ? '#4f7fc0' : '#4f7fc0', 2) + Cn(100, 144, 2.2, '#fff', 0) + Cn(100, 162, 2.2, '#fff', 0) + (v ? Pt(starD(68, 146, 11, 0.45), '#ffd23f', '#b98a12', 2.4) + Cn(68, 146, 3, '#fff7c2', 0) : Pt(starD(68, 146, 7, 0.45), '#ffd23f', '#b98a12', 2));
+      var spots = v ? Cn(64, 60, 2, '#ffd23f', 0) + Cn(140, 58, 2, '#ffd23f', 0) : Pn('M64 48 Q80 40 92 48 Q86 62 70 62 Z', '#a0784e') + Pn('M140 92 Q156 90 158 104 Q146 112 138 104 Z', '#fff4e6');
+      var c = baseX({ fur: fur, fur2: f2, earIn: '#ffb8cf', torso: torso, arms: sh, cuff: lt(sh, 0.4), feetC: v ? '#4a5a8a' : '#7a4a2a', toeC: v ? '#c0c8d8' : '#d9965a', mouth: 'open', nose: '#ff7f9e', chest: false, shadeC: v ? '#8a92a8' : '#7a5a3a',
+        headClip: spots, whisk: v ? '#8a92a8' : '#7a5a42', back: v ? En(100, 112, 98, 100, '#c0c8d8', 0.25) : '',
+        headOver: v ? spark(162, 50, 8, '#ffd23f') + spark(34, 64, 6, '#fff') + spark(170, 122, 5, '#ffd23f') : '' });
+      return { cat: c, tail: v ? tailFluff(0, fur, '#c0c8d8', O, '#ffffff') : tailBand(fur, '#a0784e', f2), eyes: eyesX(v ? '#5a7ad6' : '#3fae6a', { lash: 1, star: v }) };
+    }
+    HERO[47] = { theme: 'Kowbojka', items: [
+      it('Czerwona chusta', 'czerwoną chustę', 'f', [100, 54], 100, 128, 86, 0, Pt('M6 6 Q50 22 94 6 L94 16 Q66 28 50 50 Q34 28 6 16 Z', '#ff3b5c', O) + [[24, 16], [50, 24], [76, 16], [50, 38], [38, 26], [62, 26]].map(function (p) { return Cn(p[0], p[1], 2, '#fff', 0); }).join('') + Pt('M80 12 L96 26 L86 30 Z', '#ff3b5c', O, 2.4)),
+      it('Kowbojki', 'kowbojki', 'p', [118, 44], 100, 182, 114, 0, pair(Pt('M14 4 H34 V22 L50 26 Q54 36 46 40 H10 Q8 26 14 4 Z', '#a0623a', O) + R(12, 38, 38, 5, 2, '#5a3a1e', O, 2) + Ln('M18 10 Q24 16 30 10 M18 18 Q24 24 30 18', '#ffd23f', 2.2) + Pt(starD(54, 38, 4, 0.45), '#c0c8d8', O, 1.5), 118)),
+      it('Podkowa', 'podkowę', 'f', [50, 50], 154, 168, 34, 0, Pt('M8 44 Q2 6 25 4 Q48 6 42 44 L32 44 Q36 16 25 16 Q14 16 18 44 Z', '#c0c8d8', O) + Cn(10, 30, 1.8, O, 0) + Cn(40, 30, 1.8, O, 0) + Cn(14, 16, 1.8, O, 0) + Cn(36, 16, 1.8, O, 0) + spark(42, 8, 5, '#fff')),
+      it('Lasso', 'lasso', 'n', [80, 80], 46, 154, 60, 0, Ln('M40 10 C10 10 4 34 22 42 C40 50 72 42 72 24 C72 6 50 4 40 10', '#d9a066', 6) + Ln('M40 10 C10 10 4 34 22 42 C40 50 72 42 72 24 C72 6 50 4 40 10', '#a8743a', 2) + Ln('M30 44 C34 58 20 66 26 78', '#d9a066', 6) + Ln('M30 44 C34 58 20 66 26 78', '#a8743a', 2)),
+      it('Konik na patyku', 'konika na patyku', 'm', [70, 130], 154, 128, 52, 16, R(30, 50, 8, 80, 4, '#c98a4b', O, 3) + Pt('M20 54 Q8 44 12 26 Q16 8 36 8 Q56 8 62 26 L66 40 Q66 48 58 48 Q50 40 42 46 Q40 58 20 54 Z', '#ffffff', O) + Pn('M30 8 Q40 0 50 10 Q44 18 38 24 Q28 16 30 8 Z', '#ff9a3a') + Ln('M14 16 Q10 30 16 40 M20 12 Q14 30 20 44', '#ff9a3a', 4) + Cn(44, 24, 3, O, 0) + Cn(60, 38, 1.8, O, 0) + R(40, 34, 22, 5, 2, '#ff3b5c', O, 1.8)),
+      it('Kapelusz kowbojski', 'kapelusz kowbojski', 'm', [140, 70], 100, 34, 128, 0, Pt('M4 46 Q20 62 70 58 Q120 62 136 46 Q128 42 116 46 Q104 34 104 30 Q100 8 82 8 Q76 14 70 14 Q64 14 58 8 Q40 8 36 30 Q36 34 24 46 Q12 42 4 46 Z', '#c98a4b', O) + Pt('M38 40 Q70 48 102 40 L102 32 Q70 40 38 32 Z', '#ff3b5c', O, 2.6) + Pt(starD(70, 36, 6, 0.45), '#ffd23f', '#b98a12', 1.6) + Ln('M48 16 Q60 12 66 18', '#e2b07a', 3))
+    ], sr: { name: 'Srebrna Szeryf' } };
+    fin(47, c47);
+    // ---------- 48: ŚWIĄTECZNY ELF (specjal: Złoty Dzwoneczek) ----------
+    function c48(v) {
+      var fur = v ? '#fff3d0' : '#f2a65a', f2 = v ? '#ffffff' : '#fff4e6', gr = v ? '#ffd23f' : '#3ebf6b', grD = v ? '#c99a12' : '#2a8f4c', rd = v ? '#ffffff' : '#ff3b5c';
+      var collar = Pt('M52 112 L64 126 L76 112 L88 128 L100 112 L112 128 L124 112 L136 126 L148 112 L148 108 H52 Z', rd, O, 2.6);
+      var torso = R(40, 110, 120, 90, 0, gr, 0) + R(40, 160, 120, 12, 0, '#2a2433', 0) + R(90, 158, 20, 16, 3, '#ffd23f', O, 2.2) + R(95, 162, 10, 8, 1, '#2a2433', 0) + Cn(100, 140, 3.4, rd, O, 2) + Cn(100, 186, 3.4, rd, O, 2) + (v ? Pt(starD(70, 186, 6, 0.45), '#fff', 0) + Pt(starD(130, 140, 6, 0.45), '#fff', 0) : '');
+      var stripes = v ? Cn(64, 60, 2, '#ffd23f', 0) + Cn(140, 58, 2, '#ffd23f', 0) + Cn(150, 90, 1.6, '#fff', 0) : Ln('M100 38 v14 M86 41 v11 M114 41 v11 M40 90 h12 M40 100 h10 M160 90 h-12 M160 100 h-10', '#d9803a', 6);
+      var c = baseX({ fur: fur, fur2: f2, earIn: '#ffb8cf', torso: torso, torsoOver: collar, arms: gr, cuff: rd, feetC: v ? '#ffd23f' : '#ff3b5c', toeC: v ? '#c99a12' : '#c92a44', mouth: 'open', nose: '#ff5a7a', chest: false, shadeC: v ? '#c9a24e' : '#a0602a',
+        headClip: stripes, cheeks: '#ff6f91', whisk: v ? '#c9a24e' : '#9a5a2a', back: v ? En(100, 112, 98, 100, '#ffd23f', 0.22) : '',
+        headOver: v ? spark(162, 50, 8, '#fff7c2') + spark(34, 64, 6, '#fff7c2') + spark(170, 122, 5, '#fff') : spark(166, 54, 6, '#ffffff') + spark(34, 70, 5, '#ffffff') });
+      return { cat: c, tail: v ? tailBand(fur, '#ffd23f', '#ffffff') : tailBand(fur, '#d9803a', '#fff4e6'), eyes: eyesX(v ? '#e09a12' : '#3fae6a', { lash: 1, star: true }) };
+    }
+    HERO[48] = { theme: 'Świąteczny Elf', items: [
+      it('Laseczka cukrowa', 'laseczkę cukrową', 'f', [44, 100], 156, 146, 30, 14, Ln('M30 96 V30 Q30 8 18 8 Q6 8 6 22', O, 13) + Ln('M30 96 V30 Q30 8 18 8 Q6 8 6 22', '#ffffff', 8) + '<path d="M30 96 V30 Q30 8 18 8 Q6 8 6 22" fill="none" stroke="#ff3b5c" stroke-width="8" stroke-dasharray="7 7" pathLength="112"/>'),
+      it('Pierniczek', 'pierniczka', 'm', [56, 64], 44, 166, 52, -8, Pt('M28 4 Q38 4 38 14 Q38 20 34 22 L50 26 Q54 34 46 34 L36 32 L42 58 Q38 62 32 58 L28 46 L24 58 Q18 62 14 58 L20 32 L10 34 Q2 34 6 26 L22 22 Q18 20 18 14 Q18 4 28 4 Z', '#d9904a', O) + Cn(24, 12, 1.8, O, 0) + Cn(32, 12, 1.8, O, 0) + Ln('M24 17 Q28 20 32 17', O, 1.8) + Ln('M8 30 l4 -2 M44 30 l4 -2 M18 54 l4 -2 M34 52 l4 2', '#ffffff', 2.4) + Cn(28, 30, 2.4, '#ff3b5c', 0) + Cn(28, 38, 2.4, '#3ebf6b', 0)),
+      it('Dzwoneczek', 'dzwoneczek', 'm', [50, 56], 100, 132, 28, 0, Pt('M25 8 Q40 8 42 30 L48 42 H2 L8 30 Q10 8 25 8 Z', '#ffd23f', '#b98a12', 3) + Cn(25, 46, 5, '#e6a400', '#b98a12', 2) + Cn(25, 6, 4, '#ffd23f', '#b98a12', 2) + Ln('M16 18 Q18 12 24 12', '#fff7c2', 3)),
+      it('Prezent', 'prezent', 'm', [64, 70], 154, 168, 48, 0, R(6, 26, 52, 40, 4, '#ff3b5c', O) + R(4, 20, 56, 12, 3, '#ff5a7a', O, 3) + R(28, 20, 8, 46, 0, '#ffd23f', 0) + Pt('M32 20 Q14 2 10 12 Q10 20 32 20 Z', '#ffd23f', O, 2.4) + Pt('M32 20 Q50 2 54 12 Q54 20 32 20 Z', '#ffd23f', O, 2.4) + R(4, 20, 56, 12, 3, 'none', O, 3) + Cn(16, 48, 2, '#fff', 0) + Cn(46, 40, 2, '#fff', 0)),
+      it('Czapka elfa', 'czapkę elfa', 'f', [130, 90], 108, 30, 120, 0, Pt('M10 74 Q30 28 64 24 Q96 18 118 8 Q110 30 88 44 Q84 58 90 74 Z', '#3ebf6b', O) + R(6, 66, 88, 16, 8, '#ffffff', O) + Cn(118, 8, 8, '#ffd23f', '#b98a12', 2.6) + Ln('M40 46 Q58 36 76 38', '#7ae09a', 3)),
+      it('Gwiazda z choinki', 'gwiazdę z choinki', 'f', [70, 70], 44, 112, 50, -12, Pt(starD(35, 35, 32, 0.45), '#ffd23f', '#b98a12', 3) + Pn(starD(35, 35, 18, 0.45), '#ffe27a') + Cn(28, 28, 4, '#fff7c2', 0) + spark(62, 10, 6, '#fff') + spark(8, 60, 5, '#fff'))
+    ], sr: { name: 'Złoty Dzwoneczek' } };
+    fin(48, c48);
     fin(25, c25);
   })();
   // podpięcie bohaterów do gry: tekstury kota/ogona/oczu (zwykłe i specjalne), motyw z 6 przedmiotami, nazwa formy specjalnej
@@ -3999,7 +4280,7 @@
       fitCam(s, true);
       if (SV && Array.isArray(SV.cells)) SV.cells.forEach(function (c, i) {   // odtworzenie kotów i pudełek
         if (!c || i >= openCount || cells[i]) return;
-        if (c.t === 'c' && c.l > MAX_LEVEL) c.l = MAX_LEVEL;   // Etap 48: kot z usuniętego poziomu (37–40) wraca jako kot 36
+        if (c.t === 'c' && c.l > MAX_LEVEL) c.l = MAX_LEVEL;   // Etap 48: kot z poziomu ponad MAX_LEVEL wraca jako najwyższy istniejący
         if (c.t === 'c' && c.l >= 1 && c.l <= MAX_LEVEL) { discover(c.l); var rc = addCat(s, c.l, i, false); if (c.cr && toysOwned.crown) putCrown(rc); } else if (c.t === 'b') spawnBox(s, i, !!c.g);
       });
       // dół: tylko transporter na środku + przycisk Kocia Łapka (szuflada menu)
@@ -4051,7 +4332,7 @@
   });
 
   // Etap 42b: grafiki SVG rysowane na canvas przed startem (bez XHR na blob: – nie działało w niektórych przeglądarkach)
-  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'a337d3bd';
+  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'57c01cde';
   function imgUrl(f) { return f.replace(/\.png$/, IMG_EXT) + (ASSET_V !== 'dev' ? '?v=' + ASSET_V : ''); }   // Etap 43: grafiki jako WebP (5× mniejsze), PNG gdy przeglądarka nie umie
   var PREIMG = {};
   function preImgs() {   // Etap 43: grafiki kotów pobierają się i dekodują od razu, równolegle z resztą startu (atlas, zapis online, uruchamianie Phasera)
