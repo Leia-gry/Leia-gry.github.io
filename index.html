@@ -210,7 +210,7 @@
   // ======================================================================================
   var WEEKLY_TASKS = {
     title: 'Zadania Tygodnia',
-    secretRewardLevels: [1, 2, 3, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48],
+    secretRewardLevels: [1, 2, 3, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48],
     tasks: [
       { id: 'toys', icon: '🧸', name: 'Posprzątaj zabawki' },
       { id: 'veg', icon: '🥦', name: 'Zjedz warzywa' },
@@ -1092,6 +1092,32 @@
     }
   }
   Object.keys(PCATS).forEach(function (L) { var c = PCATS[L]; reg('cat' + L, 200, 200, procCat(c)); reg('tail' + L, 60, 130, procTail(c)); reg('eyes' + L, 200, 200, procEyes(c)); });
+  // ===== Etap 51: FORMY SPECJALNE dla kotów 13–24 (ten sam kształt – ubranka pasują – nowe kolory, wzór, oczy, poświata i ozdoby) =====
+  (function () {
+    function sp4(x, y, r, c) { return '<path d="M' + x + ' ' + (y - r) + ' Q' + x + ' ' + y + ' ' + (x + r) + ' ' + y + ' Q' + x + ' ' + y + ' ' + x + ' ' + (y + r) + ' Q' + x + ' ' + y + ' ' + (x - r) + ' ' + y + ' Q' + x + ' ' + y + ' ' + x + ' ' + (y - r) + 'Z" fill="' + (c || '#fff') + '"/>'; }
+    function aura(c1, c2) { return '<defs><radialGradient id="au"><stop offset="0" stop-color="' + c1 + '" stop-opacity=".55"/><stop offset=".7" stop-color="' + (c2 || c1) + '" stop-opacity=".22"/><stop offset="1" stop-color="' + (c2 || c1) + '" stop-opacity="0"/></radialGradient></defs><ellipse cx="100" cy="112" rx="100" ry="98" fill="url(#au)"/>'; }
+    function dots(pts, c, r) { return pts.map(function (p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r || 2) + '" fill="' + c + '"/>'; }).join(''); }
+    function bolt(x, y, k, c) { return '<path d="M' + x + ' ' + y + ' l' + (8 * k) + ' 0 l' + (-5 * k) + ' ' + (10 * k) + ' l' + (7 * k) + ' 0 l' + (-14 * k) + ' ' + (16 * k) + ' l' + (4 * k) + ' ' + (-12 * k) + ' l' + (-6 * k) + ' 0 Z" fill="' + c + '" stroke="#4b3340" stroke-width="2" stroke-linejoin="round"/>'; }
+    function flk(x, y, r, c) { var d = '', i, a; for (i = 0; i < 3; i++) { a = i * Math.PI / 3; d += 'M' + (x - Math.cos(a) * r).toFixed(1) + ' ' + (y - Math.sin(a) * r).toFixed(1) + 'L' + (x + Math.cos(a) * r).toFixed(1) + ' ' + (y + Math.sin(a) * r).toFixed(1); } return '<path d="' + d + '" stroke="' + c + '" stroke-width="2.6" stroke-linecap="round"/>'; }
+    function gem(x, y, r, c) { return '<path d="M' + x + ' ' + (y - r) + ' L' + (x + r * 0.8) + ' ' + y + ' L' + x + ' ' + (y + r) + ' L' + (x - r * 0.8) + ' ' + y + ' Z" fill="' + c + '" stroke="#4b3340" stroke-width="2"/><path d="M' + (x - r * 0.3) + ' ' + (y - r * 0.4) + ' l' + (r * 0.3) + ' -' + (r * 0.3) + '" stroke="#fff" stroke-width="2"/>'; }
+    var PSR = {
+      13: { name: 'Dyniowy Duszek', c: { fur: '#eafff4', fur2: '#ffffff', acc: '#7ae0b0', eye: '#2ab07a', eyes: 'sparkle' }, aura: ['#7ae0b0'], fx: dots([[40, 60], [160, 70], [30, 130], [172, 140]], '#bdfce0', 3) + sp4(156, 48, 8, '#bdfce0') + sp4(42, 104, 6, '#bdfce0') },
+      14: { name: 'Ametystowa Wróżka', c: { fur: '#7a4de0', fur2: '#c9a8ff', acc: '#ffd23f', eye: '#ff9ad8' }, aura: ['#c9a8ff', '#7a4de0'], fx: gem(100, 52, 8, '#ff9ad8') + sp4(160, 50, 8) + sp4(36, 70, 6) + sp4(170, 128, 5) },
+      15: { name: 'Biała Czekolada', c: { fur: '#fff3e0', fur2: '#ffffff', acc: '#d9a05a', eye: '#c06a20', eyes: 'sparkle' }, aura: ['#ffe2b0'], fx: dots([[60, 66], [140, 66], [100, 52]], '#d9a05a', 2.6) + sp4(160, 52, 8, '#ffd23f') },
+      16: { name: 'Lodowa Mięta', c: { fur: '#d6f4ff', fur2: '#ffffff', acc: '#7ac8ff', eye: '#2a7ad8', eyes: 'sparkle' }, aura: ['#a8e4ff'], fx: flk(40, 62, 9, '#ffffff') + flk(160, 58, 8, '#ffffff') + flk(170, 130, 6, '#ffffff') + flk(30, 134, 6, '#ffffff') },
+      17: { name: 'Diamentowy Węgielek', c: { fur: '#2a3150', fur2: '#c9e8ff', acc: '#7ad6ff', eye: '#7ad6ff' }, aura: ['#7ad6ff', '#2a3150'], fx: gem(36, 70, 9, '#c9f2ff') + gem(166, 120, 7, '#c9f2ff') + sp4(158, 50, 8, '#c9f2ff') },
+      18: { name: 'Królowa Róż', c: { fur: '#e0306a', fur2: '#ffd0e0', acc: '#ffd23f', eye: '#ffd23f' }, aura: ['#ff7aa8'], fx: '<circle cx="40" cy="62" r="8" fill="#ff5a8a" stroke="#4b3340" stroke-width="2"/><path d="M36 60 q4 -4 7 1" stroke="#b3264a" stroke-width="2" fill="none"/><circle cx="162" cy="56" r="7" fill="#ff5a8a" stroke="#4b3340" stroke-width="2"/>' + sp4(170, 128, 6, '#ffd23f') },
+      19: { name: 'Złoty Faraon', c: { fur: '#ffd86a', fur2: '#fff3c2', acc: '#c9962a', eye: '#2ab0b0', eyes: 'sparkle' }, aura: ['#ffd23f'], fx: gem(100, 52, 8, '#2ab0b0') + sp4(160, 50, 8, '#fff7c2') + sp4(38, 76, 6, '#fff7c2') },
+      20: { name: 'Burzowa Chmurka', c: { fur: '#3a4a8a', fur2: '#c9d6ff', acc: '#ffd23f', eye: '#ffd23f', eyes: 'sparkle' }, aura: ['#7a9aff', '#3a4a8a'], fx: bolt(150, 40, 1.2, '#ffd23f') + bolt(30, 110, 0.9, '#ffd23f') },
+      21: { name: 'Płomienny Rubin', c: { fur: '#ff5a2a', fur2: '#ffe08a', acc: '#ffd23f', eye: '#ffd23f', eyes: 'sparkle' }, aura: ['#ffb02e', '#ff3a2a'], fx: '<path d="M156 66 Q148 52 158 40 Q160 52 168 48 Q170 60 156 66 Z" fill="#ffd23f" stroke="#c9480a" stroke-width="2"/><path d="M36 70 Q30 60 38 50 Q40 60 46 56 Q48 66 36 70 Z" fill="#ffd23f" stroke="#c9480a" stroke-width="2"/>' },
+      22: { name: 'Słoneczny Promyk', c: { fur: '#ffcf2a', fur2: '#fff7c2', acc: '#ff8a2e', eye: '#ff6a00' }, aura: ['#fff3a8', '#ffcf2a'], fx: '<g stroke="#ffb000" stroke-width="4" stroke-linecap="round">' + [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) { var a = -Math.PI * (0.08 + i * 0.12), r1 = 96, r2 = 108; return '<path d="M' + (100 + Math.cos(a) * r1).toFixed(1) + ' ' + (94 + Math.sin(a) * r1 * 0.9).toFixed(1) + ' L' + (100 + Math.cos(a) * r2).toFixed(1) + ' ' + (94 + Math.sin(a) * r2 * 0.9).toFixed(1) + '"/>'; }).join('') + '</g>' },
+      23: { name: 'Gwiazdozbiór', c: { fur: '#1c1840', fur2: '#5a4ea8', acc: '#ffe27a', eye: '#7ad6ff' }, aura: ['#5a4ea8', '#1c1840'], fx: '<path d="M38 60 L58 48 L74 58 M128 52 L150 44 L164 62" stroke="#ffe27a" stroke-width="1.6" opacity=".8"/>' + dots([[38, 60], [58, 48], [74, 58], [128, 52], [150, 44], [164, 62]], '#fff7c2', 3) + sp4(172, 130, 6, '#fff7c2') },
+      24: { name: 'Cesarz Diamentów', c: { fur: '#eef3ff', fur2: '#ffffff', acc: '#7ad6ff', eye: '#4a7ad8' }, aura: ['#c9f2ff', '#7ad6ff'], fx: gem(40, 66, 9, '#c9f2ff') + gem(162, 60, 9, '#ffd6f2') + gem(168, 132, 6, '#c9f2ff') + sp4(30, 120, 6) }
+    };
+    Object.keys(PSR).forEach(function (L) { var d = PSR[L], c = {}; Object.keys(PCATS[L]).forEach(function (k) { c[k] = PCATS[L][k]; }); Object.keys(d.c).forEach(function (k) { c[k] = d.c[k]; });
+      reg('catS' + L, 200, 200, aura(d.aura[0], d.aura[1]) + procCat(c) + d.fx); reg('tailS' + L, 60, 130, procTail(c)); reg('eyesS' + L, 200, 200, procEyes(c)); SECRET[L] = { name: d.name }; });
+    THEME_CLASSIC.items.forEach(function (it) { it.sr = { x: it.x, y: it.y, ang: it.ang }; });   // ubranka klasyczne zostają w formie specjalnej (ten sam kształt kota)
+  })();
   // ===== Etap 14: SVG zabawek i miski (kłębek i piramidka z Etapu 13 wracają jako zabawki do kupienia) =====
   (function () {
     var O = OL, sw = 'stroke="' + O + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"';
@@ -2614,22 +2640,27 @@
     } });
   }
   function maxDiscLevel() { var m = 1; Object.keys(discovered).forEach(function (l) { if (discovered[l] && +l > m) m = +l; }); return m; }
-  function spawnBox(s, force, goldenIn) {
+  function spawnBox(s, force, goldenIn, rainbowIn) {
     if (H.building && force === undefined) return false;
     var free = []; for (var i = 0; i < openCount; i++) if (!cells[i]) free.push(i);
     if (!free.length) return false;
     var _p = H.cat; H.cat = 'world';
-    var i2 = force !== undefined ? force : free[Math.floor(Math.random() * free.length)], p = slotPos(i2), golden = !!goldenIn;
-    if (force === undefined) { boxCount++; if (boxCount % GOLD_EVERY === 0 && maxDiscLevel() >= 3) golden = true; sfx(golden ? 'gold' : 'box'); }   // Etap 37/40: co GOLD_EVERY-tą skrzynka jest złota (kot o 1 poziom niżej od najwyższego odblokowanego); Etap 40: 20 -> 30
+    var i2 = force !== undefined ? force : free[Math.floor(Math.random() * free.length)], p = slotPos(i2), golden = !!goldenIn, rainbow = !!rainbowIn;
+    if (force === undefined) { boxCount++; if (boxCount % GOLD_EVERY === 0 && maxDiscLevel() >= 3) { golden = true; if ((boxCount / GOLD_EVERY) % RAINBOW_EVERY === 0) { golden = false; rainbow = true; } } sfx(rainbow ? 'fan1' : golden ? 'gold' : 'box'); }   // Etap 51: co 5. złota skrzynka jest TĘCZOWA   // Etap 37/40: co GOLD_EVERY-tą skrzynka jest złota (kot o 1 poziom niżej od najwyższego odblokowanego); Etap 40: 20 -> 30
     var sp = s.add.image(p.x, SY[i2] - 74, 'crate').setDepth(10); sp.base = 150 / sp.width; sp.setScale(0); if (golden) sp.setTint(0xffd84a);
     var zone = s.add.zone(p.x, p.y, 230, 230).setDepth(11).setInteractive();
-    var box = { type: 'box', sprite: sp, zone: zone, slot: i2, golden: golden }; cells[i2] = box;
+    var box = { type: 'box', sprite: sp, zone: zone, slot: i2, golden: golden, rainbow: rainbow }; cells[i2] = box;
+    if (rainbow) {   // Etap 51: tęczowa skrzynka – kolory przelewają się, tęczowa poświata, iskry
+      fxTex(s); box.glow = s.add.image(p.x, SY[i2] - 74, 'fxGlow').setDepth(9).setBlendMode(Phaser.BlendModes.ADD).setScale(1.7).setAlpha(0.9);
+      s.tweens.add({ targets: box.glow, scale: 2.2, alpha: 0.5, duration: 600, yoyo: true, repeat: -1 });
+      box.rbTw = s.tweens.addCounter({ from: 0, to: 360, duration: 2400, repeat: -1, onUpdate: function (tw) { if (!sp.scene) return; var h = tw.getValue() / 360, c1 = Phaser.Display.Color.HSVToRGB(h, 0.55, 1).color, c2 = Phaser.Display.Color.HSVToRGB((h + 0.33) % 1, 0.6, 1).color; sp.setTint(c1, c1, c2, c2); box.glow.setTint(Phaser.Display.Color.HSVToRGB(h, 0.8, 1).color); } });
+    }
     if (golden) { fxTex(s); box.glow = s.add.image(p.x, SY[i2] - 74, 'fxGlow').setDepth(9).setBlendMode(Phaser.BlendModes.ADD).setTint(0xffd21f).setScale(1.5).setAlpha(0.8); s.tweens.add({ targets: box.glow, scale: 1.9, alpha: 0.4, duration: 700, yoyo: true, repeat: -1 }); }
     s.tweens.add({ targets: sp, scale: sp.base, duration: 350, ease: 'Back.easeOut', onComplete: function () {
       if (!sp.scene) return;
       s.tweens.add({ targets: sp, scaleX: sp.base * 1.07, scaleY: sp.base * 1.07, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });   // pulsowanie
     } });
-    box.timer = s.time.addEvent({ delay: 1800, loop: true, callback: function () { if (box.golden) sparks(s, p.x, p.y - 60, 4, true); s.tweens.add({ targets: sp, angle: 8, duration: 70, yoyo: true, repeat: 3, onComplete: function () { sp.setAngle(0); } }); } }); // trzęsienie
+    box.timer = s.time.addEvent({ delay: 1800, loop: true, callback: function () { if (box.golden || box.rainbow) sparks(s, p.x, p.y - 60, box.rainbow ? 7 : 4, true); s.tweens.add({ targets: sp, angle: 8, duration: 70, yoyo: true, repeat: 3, onComplete: function () { sp.setAngle(0); } }); } }); // trzęsienie
     zone.on('pointerdown', function () { openBox(s, box); });
     H.cat = _p; return true;
   }
@@ -2637,8 +2668,71 @@
     if (cells[box.slot] !== box) return;
     s.tweens.killTweensOf(box.sprite); box.timer.remove(); box.sprite.destroy(); box.zone.destroy(); cells[box.slot] = null;
     if (box.glow) { s.tweens.killTweensOf(box.glow); box.glow.destroy(); }
+    if (box.rbTw) { box.rbTw.remove(); box.rbTw = null; }
+    if (box.rainbow) { openRainbow(s, box.slot); return; }
     var lv = box.golden ? Math.max(1, maxDiscLevel() - 1) : 1;
     sfx('meow'); if (box.golden) sfx('gold'); discover(lv); addCat(s, lv, box.slot, true); var p = slotPos(box.slot); sparks(s, p.x, p.y, box.golden ? 20 : 8, true); if (box.golden) floatText(s, p.x, p.y - 140, 'Złota skrzynka!', '#fff3a8', '#a86b00', 40, 1500, true); updateHUD(); saveGame();
+  }
+
+  // ================= Etap 51: TĘCZOWA SUPER SKRZYNKA (co 5. złota) – nowy kotek o poziom wyżej + losowa forma specjalna =================
+  var RAINBOW_EVERY = 5;
+  function canSecret(l) { if (!SECRET[l]) return false; if (isSheet(l)) return !!SHEET_CATS[l].sr; return true; }
+  function openRainbow(s, slot) {
+    // 1) nagrody liczone i ZAPISANE od razu (wyjście w trakcie animacji niczego nie zabiera)
+    var top = maxDiscLevel(), newL = Math.min(MAX_LEVEL, top + 1), fresh = !discovered[newL]; discover(newL);
+    var pool = Object.keys(SECRET).map(Number).filter(function (l) { return discovered[l] && !secretOwn[l] && canSecret(l); });
+    var srL = pool.length ? pool[Math.floor(Math.random() * pool.length)] : 0, bonus = srL ? 0 : 50;
+    if (srL) { secretOwn[srL] = 1; secretShow[srL] = 1; } else gems += bonus;
+    addCat(s, newL, slot, false); var shelfCat = cells[slot]; if (shelfCat && shelfCat.outer) shelfCat.outer.setVisible(false);
+    if (srL) refreshForms(); updateHUD(); saveGame();
+    // 2) MEGA efekt
+    overlay(s); var RBC = [0xff5a7a, 0xffa53a, 0xffd23f, 0x3ecf6b, 0x3a9bff, 0x8e5ce6], done = false;
+    var rays = mAdd(s.add.container(GW / 2, 600), 1001), g = s.add.graphics(); for (var r = 0; r < 18; r++) { var a0 = r / 18 * Math.PI * 2, a1 = a0 + Math.PI / 18; g.fillStyle(RBC[r % 6], 0.42); g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(a0) * 900, Math.sin(a0) * 900); g.lineTo(Math.cos(a1) * 900, Math.sin(a1) * 900); g.closePath(); g.fillPath(); } rays.add(g); rays.setAlpha(0).setScale(0.3);
+    s.tweens.add({ targets: rays, alpha: 1, scale: 1, duration: 700, ease: 'Cubic.easeOut' }); s.tweens.add({ targets: rays, angle: 360, duration: 12000, repeat: -1 });
+    fxTex(s); var glow = mAdd(s.add.image(GW / 2, 620, 'fxGlow').setBlendMode(Phaser.BlendModes.ADD).setScale(4.5).setAlpha(0.7), 1002);
+    var crate = mAdd(s.add.image(GW / 2, 640, 'crate'), 1003); crate.setScale(0); var cb = 340 / crate.width;
+    var tw = s.tweens.addCounter({ from: 0, to: 360, duration: 1500, repeat: -1, onUpdate: function (t) { var h = t.getValue() / 360; if (crate.scene) crate.setTint(Phaser.Display.Color.HSVToRGB(h, 0.55, 1).color, Phaser.Display.Color.HSVToRGB((h + 0.2) % 1, 0.55, 1).color, Phaser.Display.Color.HSVToRGB((h + 0.4) % 1, 0.55, 1).color, Phaser.Display.Color.HSVToRGB((h + 0.6) % 1, 0.55, 1).color); if (glow.scene) glow.setTint(Phaser.Display.Color.HSVToRGB(h, 0.9, 1).color); } });
+    modalObjs.push({ scene: s, destroy: function () { tw.remove(); }, setDepth: function () { } });
+    var title = mAdd(txt(s, GW / 2, 230, 'TĘCZOWA SKRZYNKA!', 60, '#ffffff', '#8e3fd0'), 1004).setScale(0);
+    s.tweens.add({ targets: title, scale: 1, duration: 500, ease: 'Back.easeOut' });
+    s.tweens.add({ targets: crate, scale: cb, duration: 600, ease: 'Back.easeOut', onComplete: shake });
+    sfx('beam');
+    function shake() {   // skrzynka trzęsie się coraz mocniej, iskry, narastający dźwięk
+      var n = 0; var ev = s.time.addEvent({ delay: 170, repeat: 11, callback: function () { n++; if (!crate.scene) return;
+        s.tweens.add({ targets: crate, angle: (n % 2 ? 1 : -1) * (3 + n * 1.3), duration: 80, yoyo: true }); crate.setScale(cb * (1 + n * 0.018));
+        sparks(s, GW / 2 + Phaser.Math.Between(-170, 170), 640 + Phaser.Math.Between(-150, 120), 3 + (n > 7 ? 3 : 0)); sfx('tick', n / 12); if (n === 12) burst(); } });
+    }
+    function burst() {
+      sfx('thud'); sfx('fan3'); var flash = s.add.rectangle(GW / 2, GH / 2, GW, GH, 0xffffff, 0).setDepth(3000);
+      for (var k = 0; k < 24; k++) (function (k) { var c = RBC[k % 6], st = s.add.star(GW / 2, 640, 5, 10, 24, c).setStrokeStyle(3, 0xffffff).setDepth(2600), an = k / 24 * Math.PI * 2, d = Phaser.Math.Between(300, 560);
+        s.tweens.add({ targets: st, x: GW / 2 + Math.cos(an) * d, y: 640 + Math.sin(an) * d, angle: Phaser.Math.Between(-360, 360), scale: 0.3, alpha: 0, duration: 1300, ease: 'Cubic.easeOut', onComplete: function () { st.destroy(); } }); })(k);
+      s.tweens.add({ targets: flash, alpha: 1, duration: 220, onComplete: function () {
+        if (crate.scene) killDestroy(crate); confetti(s); s.time.delayedCall(450, function () { confetti(s); }); stage1();
+        s.tweens.add({ targets: flash, alpha: 0, duration: 700, onComplete: function () { flash.destroy(); } }); } });
+    }
+    var stObjs = [];
+    function st(o, d) { mAdd(o, d || 1005); stObjs.push(o); return o; }
+    function clearStage() { stObjs.forEach(killDestroy); stObjs = []; }
+    function card(head, col, stroke) { var gg = st(s.add.graphics(), 1003); gg.fillStyle(0xffffff, 0.94).fillRoundedRect(70, 300, 580, 760, 46); gg.lineStyle(12, col, 1).strokeRoundedRect(70, 300, 580, 760, 46); title.setText(head).setColor('#ffffff').setStroke(stroke, 10); s.tweens.add({ targets: title, scale: { from: 0.6, to: 1 }, duration: 400, ease: 'Back.easeOut' }); }
+    function btn(label, col, fn) { var b = st(s.add.rectangle(GW / 2, 990, 320, 92, col).setStrokeStyle(7, 0xffffff).setInteractive(), 1006); st(txt(s, GW / 2, 990, label, 46, '#ffffff'), 1007); s.time.delayedCall(700, function () { b.on('pointerup', fn); }); H.rbNext = fn; s.tweens.add({ targets: b, scaleX: 1.05, scaleY: 1.05, duration: 600, yoyo: true, repeat: -1 }); }
+    function showCat(L, sec) { var c = buildCat(s, L, { anim: true, secret: sec, ignoreHidden: true }); c.outer.setPosition(GW / 2, 610).setScale(0); st(c.outer, 1006); s.tweens.add({ targets: c.outer, scale: 2.0, duration: 750, ease: 'Back.easeOut' }); sparks(s, GW / 2, 600, 18); return c; }
+    function stage1() {
+      card(fresh ? 'NOWY KOTEK!' : 'KOTEK!', 0xff5a9a, '#d1307a'); sfx('newcat');
+      showCat(newL, false);
+      st(txt(s, GW / 2, 830, (names[newL] || 'Kotek') + ' • poziom ' + newL, 44, '#5a3d5c'));
+      st(txt(s, GW / 2, 890, fresh ? 'Odblokowany zupełnie nowy kotek!' : 'Masz już wszystkie koty – oto najwyższy!', 28, '#8a6f8c'));
+      btn('Dalej ▶', 0xb36bff, stage2);
+    }
+    function stage2() {
+      clearStage(); sfx('fan2'); confetti(s);
+      if (srL) { card('FORMA SPECJALNA!', 0xffc400, '#a86b00'); showCat(srL, true);
+        st(txt(s, GW / 2, 830, '✨ ' + SECRET[srL].name + ' ✨', 40, '#8a3fd0'));
+        st(txt(s, GW / 2, 890, (names[srL] || 'Kotek') + ' ma nową formę!\nZmienisz ją w Albumie.', 26, '#8a6f8c'));
+      } else { card('BONUS!', 0x3a9bff, '#2a5fb0'); st(txt(s, GW / 2, 620, '+' + bonus + ' 💎', 110, '#9fe8ff', '#2a4fb0'));
+        st(txt(s, GW / 2, 820, 'Wszystkie formy specjalne już masz!', 30, '#8a6f8c')); flyGems(s, GW / 2, 620, bonus, bonus); }
+      btn('Super!', 0x3ecf6b, finish);
+    }
+    function finish() { if (done) return; done = true; closeModal(); var c = cells[slot]; if (c && c.outer) { c.outer.setVisible(true).setScale(0); s.tweens.add({ targets: c.outer, scale: 1, duration: 500, ease: 'Back.easeOut' }); var p = slotPos(slot); sparks(s, p.x, p.y, 20, true); } updateHUD(); }
   }
 
   // ================= EXP / poziom / półka =================
@@ -3364,7 +3458,7 @@
   function devShrink(s) {
     if (!devReal || !s || !H.cam) return; var real = devReal.open, plan = devFold(real);
     function kill(i) { var c = cells[i]; if (!c) return; cells[i] = null; if (c.type === 'cat') destroyCat(c); else if (c.type === 'box') { s.tweens.killTweensOf(c.sprite); if (c.timer) c.timer.remove(); if (c.glow) { s.tweens.killTweensOf(c.glow); c.glow.destroy(); } c.sprite.destroy(); c.zone.destroy(); } }
-    plan.moves.forEach(function (m) { var c = cells[m.from], lvl = c.type === 'cat' ? c.level : 0, gold = !!c.golden; kill(m.from); if (lvl) addCat(s, lvl, m.to, false); else spawnBox(s, m.to, gold); });
+    plan.moves.forEach(function (m) { var c = cells[m.from], lvl = c.type === 'cat' ? c.level : 0, gold = !!c.golden, rb = !!c.rainbow; kill(m.from); if (lvl) addCat(s, lvl, m.to, false); else spawnBox(s, m.to, gold, rb); });
     plan.drops.forEach(kill);
     for (var i = real; i < NSLOTS; i++) (function (o) {                          // półki zwijają się i znikają
       if (!o) return; var parts = ['post', 'shelf', 'seat'].map(function (k) { return o[k]; }).filter(function (x) { return x && x.scene; });
@@ -3374,7 +3468,7 @@
     openCount = real; redrawPosts(); fitCam(s, false);
   }
   function devSaveCells() {   // komórki do zapisu: tylko prawdziwe półki; rzeczy z fałszywych półek upychane w wolnych prawdziwych
-    function ser(c) { return c && c.type === 'cat' ? { t: 'c', l: c.level, cr: c.crown ? 1 : 0 } : (c && c.type === 'box' ? { t: 'b', g: c.golden ? 1 : 0 } : 0); }
+    function ser(c) { return c && c.type === 'cat' ? { t: 'c', l: c.level, cr: c.crown ? 1 : 0 } : (c && c.type === 'box' ? { t: 'b', g: c.golden ? 1 : 0, r: c.rainbow ? 1 : 0 } : 0); }
     if (!devMode || !devReal) return cells.map(ser);
     var real = devReal.open, out = cells.slice(0, real).map(ser), plan = devFold(real);
     plan.moves.forEach(function (m) { out[m.to] = ser(cells[m.from]); }); return out;
@@ -4534,7 +4628,7 @@
       if (SV && Array.isArray(SV.cells)) SV.cells.forEach(function (c, i) {   // odtworzenie kotów i pudełek
         if (!c || i >= openCount || cells[i]) return;
         if (c.t === 'c' && c.l > MAX_LEVEL) c.l = MAX_LEVEL;   // Etap 48: kot z poziomu ponad MAX_LEVEL wraca jako najwyższy istniejący
-        if (c.t === 'c' && c.l >= 1 && c.l <= MAX_LEVEL) { discover(c.l); var rc = addCat(s, c.l, i, false); if (c.cr && toysOwned.crown) putCrown(rc); } else if (c.t === 'b') spawnBox(s, i, !!c.g);
+        if (c.t === 'c' && c.l >= 1 && c.l <= MAX_LEVEL) { discover(c.l); var rc = addCat(s, c.l, i, false); if (c.cr && toysOwned.crown) putCrown(rc); } else if (c.t === 'b') spawnBox(s, i, !!c.g, !!c.r);
       });
       // dół: tylko transporter na środku + przycisk Kocia Łapka (szuflada menu)
       var CX = 360, cr = s.add.image(CX, 1148, 'crate').setDepth(30); cr.base = 188 / cr.width; cr.setScale(cr.base); var cz = s.add.zone(CX, 1150, 220, 190).setDepth(31).setInteractive(); H.carrier = cr;
@@ -4580,12 +4674,12 @@
         for (var q = 0; q < openCount; q++) { discover(1 + q % 4); addCat(s, 1 + q % 4, q, false); }
         s.time.addEvent({ delay: 2600, loop: true, callback: function () { if (openCount >= NSLOTS) return; addExp(s, need(), 360, 700); var n = openCount - 1; if (!cells[n]) { var lv = 1 + (n * 7) % 4; discover(lv); addCat(s, lv, n, true); } } });
       }
-      if (/[?&]debug=1/.test(window.location.search)) window.__cc = { openDance: openDance, DNget: function () { return DN; }, startConcert: startConcert, pickCat: pickCat, openMinigames: openMinigames, H: H, cells: cells, SX: SX, SY: SY, openCount: function () { return openCount; }, addExp: addExp, need: need, addCat: addCat, discover: discover, spawnBalloon: spawnBalloon, revealBall: revealBall, openMemory: openMemory, openMap: openMap, openAlbum: openAlbum, openShop: openShop, popBalloon: popBalloon, setGems: function (n) { gems = n; updateHUD(); }, openShelf: openShelf, fitCam: fitCam, getState: function () { return { gems: gems, coins: coins, pLevel: pLevel }; } };
+      if (/[?&]debug=1/.test(window.location.search)) window.__cc = { discover: discover, spawnBox: spawnBox, openRainbow: openRainbow, buildCat: buildCat, openDance: openDance, DNget: function () { return DN; }, startConcert: startConcert, pickCat: pickCat, openMinigames: openMinigames, H: H, cells: cells, SX: SX, SY: SY, openCount: function () { return openCount; }, addExp: addExp, need: need, addCat: addCat, discover: discover, spawnBalloon: spawnBalloon, revealBall: revealBall, openMemory: openMemory, openMap: openMap, openAlbum: openAlbum, openShop: openShop, popBalloon: popBalloon, setGems: function (n) { gems = n; updateHUD(); }, openShelf: openShelf, fitCam: fitCam, getState: function () { return { gems: gems, coins: coins, pLevel: pLevel }; } };
     }
   });
 
   // Etap 42b: grafiki SVG rysowane na canvas przed startem (bez XHR na blob: – nie działało w niektórych przeglądarkach)
-  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'0920b486';
+  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'37977964';
   function imgUrl(f) { return f.replace(/\.png$/, IMG_EXT) + (ASSET_V !== 'dev' ? '?v=' + ASSET_V : ''); }   // Etap 43: grafiki jako WebP (5× mniejsze), PNG gdy przeglądarka nie umie
   var PREIMG = {};
   function preImgs() {   // Etap 43: grafiki kotów pobierają się i dekodują od razu, równolegle z resztą startu (atlas, zapis online, uruchamianie Phasera)
