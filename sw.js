@@ -1,5 +1,5 @@
 // Cat Condo Leia – pamięć podręczna (Etap 43). Grafiki z ?v= z pamięci telefonu (szybki start), strona zawsze świeża z sieci, bez sieci – ostatnia wersja.
-var C = 'cc-leia-1';
+var C = 'cc-leia-2';   // Etap 54b: strona zawsze z sieci z pominięciem pamięci przeglądarki (GitHub Pages trzyma ją 10 min)
 self.addEventListener('install', function () { self.skipWaiting(); });
 self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', function (e) {
@@ -17,7 +17,7 @@ self.addEventListener('fetch', function (e) {
     return;
   }
   if (rq.mode === 'navigate') {
-    e.respondWith(fetch(rq).then(function (r) { if (r.ok) { var cp = r.clone(); caches.open(C).then(function (c) { c.put(u.pathname, cp); }); } return r; })
+    e.respondWith(fetch(u.href, { cache: 'no-cache', credentials: 'same-origin' }).then(function (r) { if (r.ok) { var cp = r.clone(); caches.open(C).then(function (c) { c.put(u.pathname, cp); }); } return r; })
       .catch(function () { return caches.open(C).then(function (c) { return c.match(u.pathname); }).then(function (r) { return r || Response.error(); }); }));
   }
 });
