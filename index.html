@@ -2543,7 +2543,7 @@
       cats.forEach(function (c) { if (c.outer.scene) c.hopper.setPosition(0, FEET).setScale(1).setAngle(0); });
       light.destroy(); notes.forEach(function (t) { s.tweens.killTweensOf(t); t.destroy(); });
       H.concert = false; concertNext = Date.now() + CONCERT_CD; confetti(s); sfx('level');
-      var g = 0; cells.forEach(function (c) { if (c && c.type === 'cat') g += INCOME[c.level - 1] * incomeMult(); }); g = Math.round(g * 20);
+      var g = 0; cells.forEach(function (c) { if (c && c.type === 'cat') g += (INCOME[c.level - 1] + (c.buddy ? INCOME[c.buddy.level - 1] : 0)) * incomeMult(); }); g = Math.round(g * 20);
       if (g > 0) { coins += g; updateHUD(); floatText(s, GW / 2, 520, 'Brawo! +' + fmt(g), '#ffe14d', '#a86b00', 60, 1900); saveGame(); }
     }
     s.time.addEvent({ delay: B * 500, repeat: STEPS - 1, callback: function () {
@@ -2912,23 +2912,40 @@
     s.input.on('dragstart', function (p, o) {
       var cat = o.cat; if (!cat || modalObjs.length) return; drag = cat; o.setDepth(100);
       s.tweens.add({ targets: o, scale: 1.12, duration: 100 });
-      cells.forEach(function (c) { if (c && c !== cat && c.type === 'cat' && c.level === cat.level) c.halo.setVisible(true); }); // żółta podpowiedź
+      cells.forEach(function (c) { if (c && c.type === 'cat') [c, c.buddy].forEach(function (x) { if (x && x !== cat && x.level === cat.level) x.halo.setVisible(true); }); }); // żółta podpowiedź
     });
     s.input.on('drag', function (p, o, dx, dy) { if (o.cat && drag === o.cat) { o.x = dx; o.y = dy; } });
     s.input.on('dragend', function (p, o) {
       var cat = o.cat; if (!cat || drag !== cat) return; drag = null;
-      cells.forEach(function (c) { if (c && c.type === 'cat') c.halo.setVisible(false); });
-      o.setDepth(10); var from = cat.slot, to = nearestSlot(o.x, o.y, 150), t = to >= 0 ? cells[to] : null;
+      cells.forEach(function (c) { if (c && c.type === 'cat') { c.halo.setVisible(false); if (c.buddy) c.buddy.halo.setVisible(false); } });
+      o.setDepth(cat.isBuddy ? 11 : 10); var from = cat.slot, to = nearestSlot(o.x, o.y, 150), t = to >= 0 ? cells[to] : null;
+      function back() { layoutBed(s, cat.isBuddy ? cat.host : cat); }
+      function leave() {   // kotek opuszcza swoje posłanie (kolega zostaje na środku)
+        if (cat.isBuddy) { var h = cat.host; h.buddy = null; cat.isBuddy = false; cat.host = null; layoutBed(s, h); }
+        else if (cat.buddy) { var b = cat.buddy; cat.buddy = null; b.isBuddy = false; b.host = null; b.slot = from; cells[from] = b; b.outer.setDepth(10); layoutBed(s, b); }
+        else cells[from] = null;
+      }
       function goTo(i) { var q = slotPos(i); s.tweens.add({ targets: o, x: q.x, y: q.y, scale: 1, duration: 200, ease: 'Back.easeOut' }); }
-      if (to < 0 || to === from) goTo(from);
-      else if (!t) { cells[to] = cat; cells[from] = null; cat.slot = to; goTo(to); }
-      else if (t.type === 'cat' && t.level === cat.level && cat.level < MAX_LEVEL) {
-        var lv = cat.level + 1; cells[from] = null; cells[to] = null; destroyCat(cat); destroyCat(t); sfx(discovered[lv] ? 'merge' : 'newcat');
-        var isNew = !discovered[lv]; discover(lv); addCat(s, lv, to, true); var q = slotPos(to); if (isNew) { gems += GEM_NEWCAT; flyGems(s, wx(q.x), wy(q.y - 90), GEM_NEWCAT, GEM_NEWCAT); } sparks(s, q.x, q.y, 12, true); addExp(s, EXP_PER_MERGE, q.x, q.y - 130); if (Math.random() < GEM_MERGE_CHANCE) { gems += 2; flyGems(s, wx(q.x), wy(q.y - 60), 2); }
-      } else goTo(from);
+      if (to < 0 || to === from) back();
+      else if (!t) { leave(); cells[to] = cat; cat.slot = to; o.setDepth(10); goTo(to); }
+      else if (t.type === 'cat') {
+        var m = (t.level === cat.level) ? t : (t.buddy && t.buddy.level === cat.level ? t.buddy : null);
+        if (m && cat.level < MAX_LEVEL) {
+          leave(); var lv = cat.level + 1, isNew = !discovered[lv], q = slotPos(to); sfx(discovered[lv] ? 'merge' : 'newcat'); discover(lv);
+          if (m === t) { var bud = t.buddy; t.buddy = null; cells[to] = null; destroyCat(cat); destroyCat(t); var nc = addCat(s, lv, to, true); if (bud) { bud.host = null; pairUp(s, nc, bud); } }
+          else { t.buddy = null; destroyCat(cat); destroyCat(m); var nb = addCat(s, lv, to, true); cells[to] = t; pairUp(s, t, nb); }
+          if (isNew) { gems += GEM_NEWCAT; flyGems(s, wx(q.x), wy(q.y - 90), GEM_NEWCAT, GEM_NEWCAT); } sparks(s, q.x, q.y, 12, true); addExp(s, EXP_PER_MERGE, q.x, q.y - 130);
+        } else if (!t.buddy) { leave(); pairUp(s, t, cat); sfx('mew'); }   // Etap 61: inny poziom → kotki przytulają się na jednym posłaniu
+        else { sfx('nope'); back(); }   // posłanie pełne (2 kotki)
+      } else back();
       saveGame();
     });
   }
+  function pairUp(s, host, b, instant) { host.buddy = b; b.isBuddy = true; b.host = host; b.slot = host.slot; b.outer.setDepth(11); layoutBed(s, host, instant);
+    if (!instant) { var q = slotPos(host.slot); for (var k = 0; k < 4; k++) floatText(s, wx(q.x) + Phaser.Math.Between(-60, 60), wy(q.y - 150 - k * 10), '💗', '#ff8fab', '#ffffff', 34, 900 + k * 120); } }
+  function layoutBed(s, host, instant) { if (!host || !host.outer || !host.outer.scene) return; var q = slotPos(host.slot), b = host.buddy;
+    function put(c, x, sc) { s.tweens.killTweensOf(c.outer); if (instant) c.outer.setPosition(x, q.y).setScale(sc); else s.tweens.add({ targets: c.outer, x: x, y: q.y, scale: sc, duration: 240, ease: 'Back.easeOut' }); }
+    if (b && b.outer && b.outer.scene) { put(host, q.x - 52, 0.8); put(b, q.x + 52, 0.8); } else put(host, q.x, 1); }
 
   // ================= Gacha (kule za diamenty) =================
   function canGacha() { return gems >= BALLS[0].cost && discList().length > 0; }
@@ -3475,7 +3492,7 @@
   function offlineReward(s, SV) {
     if (!SV || !SV.t || devMode || H.building) return;
     var secs = (Date.now() - num(SV.t, 0)) / 1000; if (!(secs >= OFFLINE_MIN_S)) return;
-    var r = 0; cells.forEach(function (x) { if (x && x.type === 'cat') r += INCOME[x.level - 1]; }); r *= incomeMult();
+    var r = 0; cells.forEach(function (x) { if (x && x.type === 'cat') r += INCOME[x.level - 1] + (x.buddy ? INCOME[x.buddy.level - 1] : 0); }); r *= incomeMult();
     var capped = secs > OFFLINE_MAX_S, use = Math.min(secs, OFFLINE_MAX_S), gain = Math.floor(r * use * OFFLINE_RATE); if (gain < 1) return;
     coins += gain; sfx('coin'); updateHUD(); saveGame();   // przyznane od razu i zapisane – nie da się go „zgubić” zamknięciem okna
     if (modalObjs.length) return; overlay(s);
@@ -3616,8 +3633,8 @@
   }
   function devShrink(s) {
     if (!devReal || !s || !H.cam) return; var real = devReal.open, plan = devFold(real);
-    function kill(i) { var c = cells[i]; if (!c) return; cells[i] = null; if (c.type === 'cat') destroyCat(c); else if (c.type === 'box') { s.tweens.killTweensOf(c.sprite); if (c.timer) c.timer.remove(); if (c.glow) { s.tweens.killTweensOf(c.glow); c.glow.destroy(); } c.sprite.destroy(); c.zone.destroy(); } }
-    plan.moves.forEach(function (m) { var c = cells[m.from], lvl = c.type === 'cat' ? c.level : 0, gold = !!c.golden, rb = !!c.rainbow; kill(m.from); if (lvl) addCat(s, lvl, m.to, false); else spawnBox(s, m.to, gold, rb); });
+    function kill(i) { var c = cells[i]; if (!c) return; cells[i] = null; if (c.type === 'cat') { if (c.buddy) destroyCat(c.buddy); destroyCat(c); } else if (c.type === 'box') { s.tweens.killTweensOf(c.sprite); if (c.timer) c.timer.remove(); if (c.glow) { s.tweens.killTweensOf(c.glow); c.glow.destroy(); } c.sprite.destroy(); c.zone.destroy(); } }
+    plan.moves.forEach(function (m) { var c = cells[m.from], lvl = c.type === 'cat' ? c.level : 0, bl = c.buddy ? c.buddy.level : 0, gold = !!c.golden, rb = !!c.rainbow; kill(m.from); if (lvl) { var nc = addCat(s, lvl, m.to, false); if (bl) { var nb = addCat(s, bl, m.to, false); cells[m.to] = nc; pairUp(s, nc, nb, true); } } else spawnBox(s, m.to, gold, rb); });
     plan.drops.forEach(kill);
     for (var i = real; i < NSLOTS; i++) (function (o) {                          // półki zwijają się i znikają
       if (!o) return; var parts = ['post', 'shelf', 'seat'].map(function (k) { return o[k]; }).filter(function (x) { return x && x.scene; });
@@ -3627,7 +3644,7 @@
     openCount = real; redrawPosts(); fitCam(s, false);
   }
   function devSaveCells() {   // komórki do zapisu: tylko prawdziwe półki; rzeczy z fałszywych półek upychane w wolnych prawdziwych
-    function ser(c) { return c && c.type === 'cat' ? { t: 'c', l: c.level, cr: c.crown ? 1 : 0 } : (c && c.type === 'box' ? { t: 'b', g: c.golden ? 1 : 0, r: c.rainbow ? 1 : 0 } : 0); }
+    function ser(c) { return c && c.type === 'cat' ? (c.buddy ? { t: 'c', l: c.level, cr: c.crown ? 1 : 0, b: c.buddy.level, bc: c.buddy.crown ? 1 : 0 } : { t: 'c', l: c.level, cr: c.crown ? 1 : 0 }) : (c && c.type === 'box' ? { t: 'b', g: c.golden ? 1 : 0, r: c.rainbow ? 1 : 0 } : 0); }
     if (!devMode || !devReal) return cells.map(ser);
     var real = devReal.open, out = cells.slice(0, real).map(ser), plan = devFold(real);
     plan.moves.forEach(function (m) { out[m.to] = ser(cells[m.from]); }); return out;
@@ -3956,7 +3973,7 @@
         var h = 0, last = 0;
         V.tick = function () { if (!V.down || Math.abs(V.tip.x - nose.x) > 60 || V.tip.y > nose.y || nose.y - V.tip.y > 200) return; h += V.dt;
           if (h - last > 300) { last = h; var d = A(s.add.image(V.tip.x, V.tip.y, 'vDrop').setScale(0.4), 1008); s.tweens.add({ targets: d, y: nose.y, duration: 300, onComplete: function () { d.destroy(); } }); sfx('tick', h / 1500); }
-          if (h > 1500) { V.tick = null; sneeze.remove(); sfx('fan0'); vib(30); cheer(nose.x, nose.y - 40, 6); say('Nosek już oddycha!'); afterIll(); } };
+          if (h > 1500) { V.tick = null; sneeze.remove(); sfx('fan0'); vib(30); cheer(nose.x, nose.y - 40, 6); say('Nosek już oddycha!'); next(scarfStep, 900); } };
         H.vetT = [[nose.x, nose.y - 80]];
       }
     }
@@ -3979,7 +3996,7 @@
         V.downF = function (t, p) { if (D(p.x, p.y, f.x, f.y) < 80) { held = true; s.tweens.killTweensOf(f); f.setPosition(p.x, p.y - 110); } };
         V.move = function (t, md, p) { if (held) f.setPosition(p.x, p.y - 110); };
         V.up = function () { if (!held) return; held = false; if (D(f.x, f.y, mouth.x, mouth.y) < 130) { V.downF = V.move = V.up = null; s.tweens.add({ targets: f, x: mouth.x, y: mouth.y, scale: 0, duration: 250 }); sfx('meow'); vib(30); wob.remove();
-            s.tweens.add({ targets: cat.outer, scaleY: CS * 0.94, scaleX: CS * 1.05, duration: 120, yoyo: true, repeat: 2 }); cheer(mouth.x, mouth.y - 60, 6); say('Brzuszek już nie boli!'); afterIll(); }
+            s.tweens.add({ targets: cat.outer, scaleY: CS * 0.94, scaleX: CS * 1.05, duration: 120, yoyo: true, repeat: 2 }); cheer(mouth.x, mouth.y - 60, 6); say('Tabletka połknięta!'); next(warmBottle, 900); }
           else s.tweens.add({ targets: f, x: f.home.x, y: f.home.y, duration: 250 }); };
       }
     }
@@ -3999,7 +4016,7 @@
         var mz2 = tmp(s.add.circle(mouth.x, mouth.y, 60, 0xffffff, 0).setStrokeStyle(5, 0xff6aa8), 1007); s.tweens.add({ targets: mz2, scale: 1.25, alpha: 0.4, duration: 600, yoyo: true, repeat: -1 });
         V.tick = function () { if (!V.down || D(V.tip.x, V.tip.y - 20, mouth.x, mouth.y) > 70) return; V.tick = null; gs.fillStyle(0xdfe5ee).fillEllipse(0, -20, 38, 20);
           sfx('meow'); vib(30); s.tweens.add({ targets: cat.outer, scaleY: CS * 0.94, scaleX: CS * 1.05, duration: 120, yoyo: true, repeat: 2 }); cheer(mouth.x, mouth.y - 60, 6); say('Mniam, malinowy syropek!');
-          fever.forEach(killDestroy); afterIll(); };
+          next(compress, 900); };
         say('Podaj syropek łyżeczką do pyszczka!');
       }
     }
@@ -4069,10 +4086,89 @@
       say('Rozczesz kołtuny szczotką!');
     }
     // ---------- 4. KARMIENIE (przeciąganie do pyszczka) ----------
-    function p4() {
-      clearPhase(); step(3); if (V.tool) { killDestroy(V.tool); V.tool = null; } say('Kotek jest głodny! Przeciągnij jedzenie do pyszczka!');
+    // ---------- Etap 61: wspólne pomocnicze kroki leczenia ----------
+    function holdStep(msg, toolObj, tg, rad, ms, fx, done) {   // przytrzymaj narzędzie przy celu przez ms
+      clearPhase(); say(msg); tool(toolObj); var h = 0, last = 0;
+      var ring = tmp(s.add.circle(tg.x, tg.y, rad * 0.8, 0xffffff, 0).setStrokeStyle(5, 0x3fbf8f), 1007); s.tweens.add({ targets: ring, scale: 1.25, alpha: 0.4, duration: 600, yoyo: true, repeat: -1 });
+      var bar = tmp(s.add.graphics(), 1011); H.vetT = [[tg.x, tg.y]];
+      V.tick = function () { if (!V.down || D(V.tip.x, V.tip.y, tg.x, tg.y) > rad) return; h += V.dt;
+        if (h - last > 300) { last = h; if (fx) fx(h / ms); sfx('tick', h / ms); vib(10); }
+        bar.clear(); bar.fillStyle(0xffffff, 1).fillRoundedRect(210, 268, 300, 22, 11); bar.fillStyle(0x3fbf8f, 1).fillRoundedRect(210, 268, 300 * Math.min(1, h / ms), 22, 11);
+        if (h >= ms) { V.tick = null; sfx('twinkle'); vib(30); done(); } };
+    }
+    function dragStep(msg, emoji, tg, done) {   // przeciągnij rzecz z tacy do celu
+      clearPhase(); if (V.tool) { killDestroy(V.tool); V.tool = null; } say(msg);
+      var tray = tmp(s.add.graphics(), 1007); tray.fillStyle(0xffffff, 1).fillRoundedRect(260, 1080, 200, 140, 40); tray.lineStyle(6, 0xb8e6d4, 1).strokeRoundedRect(260, 1080, 200, 140, 40);
+      var f = tmp(txt(s, 360, 1150, emoji, 86, '#000000'), 1012); f.home = { x: 360, y: 1150 }; s.tweens.add({ targets: f, angle: { from: -8, to: 8 }, duration: 420, yoyo: true, repeat: -1 });
+      var mz = tmp(s.add.circle(tg.x, tg.y, 60, 0xffffff, 0).setStrokeStyle(5, 0xffb02e), 1007); s.tweens.add({ targets: mz, scale: 1.25, alpha: 0.4, duration: 600, yoyo: true, repeat: -1 });
+      var held = false; H.vetT = [[tg.x, tg.y]];
+      V.downF = function (t, p) { if (D(p.x, p.y, f.x, f.y) < 90) { held = true; s.tweens.killTweensOf(f); f.setAngle(0).setPosition(p.x, p.y - 110); } };
+      V.move = function (t, md, p) { if (held) f.setPosition(p.x, p.y - 110); };
+      V.up = function () { if (!held) return; held = false;
+        if (D(f.x, f.y, tg.x, tg.y) < 130) { V.downF = V.move = V.up = null; killDestroy(mz); s.tweens.add({ targets: f, x: tg.x, y: tg.y, duration: 220 }); sfx('equip'); vib(25); done(f); }
+        else s.tweens.add({ targets: f, x: f.home.x, y: f.home.y, duration: 250 }); };
+    }
+    function forehead() { return { x: mouth.x, y: B.y + B.height * 0.2 }; }
+    // gorączka: syrop → zimny okład na czółko → termometr pokazuje zdrową temperaturę
+    function compress() {
+      var cl = s.add.container(0, 0), g = s.add.graphics(); g.fillStyle(0x9ad8ff).fillRoundedRect(-44, -40, 88, 40, 12); g.lineStyle(4, 0x3a8ad8).strokeRoundedRect(-44, -40, 88, 40, 12); g.lineStyle(3, 0xffffff).lineBetween(-30, -28, 30, -28).lineBetween(-30, -16, 30, -16); cl.add(g);
+      holdStep('Połóż zimny okład na czółko i przytrzymaj!', cl, forehead(), 80, 1800, function (k) { fever.forEach(function (o) { if (o.scene) o.setAlpha(Math.max(0, 1 - k)); }); var f = forehead(); var d = A(s.add.circle(f.x + R(-40, 40), f.y, 5, 0xbfe8ff), 1008); s.tweens.add({ targets: d, y: d.y - 40, alpha: 0, duration: 500, onComplete: function (tw, tg2) { tg2[0].destroy(); } }); },
+        function () { fever.forEach(killDestroy); var tt = A(txt(s, mouth.x + 150, mouth.y - 60, '36,6°C 💚', 44, '#2fae7a', '#ffffff'), 1012); s.tweens.add({ targets: tt, y: tt.y - 40, alpha: 0, delay: 900, duration: 600, onComplete: function () { tt.destroy(); } }); cheer(mouth.x, mouth.y - 80, 6); say('Gorączka spadła! Kotek ma 36,6°C.'); afterIll(); });
+    }
+    // katar: chusteczka → kropelki → ciepły szalik
+    function scarfStep() {
+      dragStep('Owiń kotka ciepłym szalikiem – przeciągnij go na szyjkę!', '🧣', { x: mouth.x, y: mouth.y + B.height * 0.14 }, function (f) { f.setScale(1.3); cheer(mouth.x, mouth.y - 60, 6); say('Ciepło i przytulnie! Katar minął.'); afterIll(); });
+    }
+    // brzuszek: stetoskop → tabletka → ciepły termofor
+    function warmBottle() {
+      var wb = s.add.container(0, 0), g = s.add.graphics(); g.fillStyle(0xff8fb8).fillRoundedRect(-40, -96, 80, 96, 24); g.lineStyle(5, 0xc8507e).strokeRoundedRect(-40, -96, 80, 96, 24); g.fillStyle(0xc8507e).fillRect(-12, -112, 24, 18); g.lineStyle(3, 0xffffff).lineBetween(-24, -70, 24, -70).lineBetween(-24, -50, 24, -50).lineBetween(-24, -30, 24, -30); wb.add(g);
+      holdStep('Przyłóż ciepły termofor do brzuszka i przytrzymaj!', wb, belly, 90, 1800, function () { var h2 = A(txt(s, belly.x + R(-50, 50), belly.y - 20, '💗', 30, '#000000'), 1008); s.tweens.add({ targets: h2, y: h2.y - 60, alpha: 0, duration: 700, onComplete: function () { h2.destroy(); } }); },
+        function () { cheer(belly.x, belly.y - 40, 8); say('Brzuszek już nie boli!'); afterIll(); });
+    }
+    // ---------- 4. KARMIENIE – za każdym razem inaczej ----------
+    function p4() { clearPhase(); step(3); if (V.tool) { killDestroy(V.tool); V.tool = null; } var v = H.vetForce4 || bag('cc_vet4', ['treats', 'kibble', 'bottle', 'fish']); ({ treats: p4treats, kibble: p4kibble, bottle: p4bottle, fish: p4fish })[v](); }
+    function munch(n) { sfx('meow'); vib(30); s.tweens.add({ targets: cat.outer, scaleY: CS * 0.94, scaleX: CS * 1.05, duration: 120, yoyo: true, repeat: n || 2 }); for (var q = 0; q < 6; q++) { var cr = A(s.add.circle(mouth.x + R(-30, 30), mouth.y + 10, R(4, 7), 0xd9a05a), 1008); s.tweens.add({ targets: cr, y: cr.y + R(40, 90), alpha: 0, duration: 500, onComplete: function (tw, tg2) { tg2[0].destroy(); } }); } }
+    function p4kibble() {
+      say('Nasyp chrupek do miseczki – przytrzymaj torebkę nad miską!');
+      var bag2 = s.add.container(0, 0), g = s.add.graphics(); g.fillStyle(0xffb02e).fillRoundedRect(-40, -130, 80, 110, 12); g.lineStyle(5, 0xa86b00).strokeRoundedRect(-40, -130, 80, 110, 12); g.fillStyle(0xa86b00).fillTriangle(-40, -20, 40, -20, 0, 0); bag2.add(g); bag2.add(txt(s, 0, -78, '🐾', 40, '#000000')); tool(bag2);
+      var bw = tmp(s.add.container(360, 1130), 1008), bg = s.add.graphics(); bw.add(bg); var lvl = 0;
+      function drawB() { bg.clear(); bg.fillStyle(0xff6a8a).fillEllipse(0, 0, 200, 70); bg.lineStyle(6, 0xc83a5a).strokeEllipse(0, 0, 200, 70); if (lvl > 0) { bg.fillStyle(0xc8803a).fillEllipse(0, -6 - lvl * 6, 150 * Math.min(1, 0.5 + lvl / 2), 30 + lvl * 10); for (var k = 0; k < 6 * lvl; k++) bg.fillStyle(0x9a5a20).fillCircle(-60 + (k * 37) % 120, -10 - lvl * 6 + ((k * 13) % 14) - 7, 5); } }
+      drawB(); H.vetT = [[360, 1050]];
+      V.tick = function () { if (!V.down || Math.abs(V.tip.x - 360) > 110 || V.tip.y > 1120 || V.tip.y < 840) return; lvl = Math.min(1, lvl + V.dt / 2000); drawB();
+        if (Math.random() < 0.6) { var k2 = A(s.add.circle(V.tip.x + R(-10, 10), V.tip.y + 4, 6, 0xc8803a).setStrokeStyle(2, 0x9a5a20), 1009); s.tweens.add({ targets: k2, y: 1120, duration: 300, onComplete: function () { k2.destroy(); } }); if (Math.random() < 0.3) sfx('tap'); }
+        if (lvl >= 1) { V.tick = null; killDestroy(V.tool); V.tool = null; say('Pełna miska! Podsuń ją kotkowi.'); push(); } };
+      function push() { var held = false;
+        V.downF = function (t, p) { if (D(p.x, p.y, bw.x, bw.y) < 120) held = true; };
+        V.move = function (t, md, p) { if (held) bw.setPosition(p.x, p.y - 60); };
+        V.up = function () { if (!held) return; held = false; if (D(bw.x, bw.y, mouth.x, mouth.y + 80) < 170) { V.downF = V.move = V.up = null; s.tweens.add({ targets: bw, x: mouth.x, y: mouth.y + 120, duration: 250 });
+            var n = 0; var ev = s.time.addEvent({ delay: 380, repeat: 5, callback: function () { n++; lvl = Math.max(0, 1 - n / 6); drawB(); munch(0); if (n >= 6) win(); } }); objs.push({ scene: s, destroy: function () { ev.remove(); } }); }
+          else s.tweens.add({ targets: bw, x: 360, y: 1130, duration: 250 }); }; }
+    }
+    function p4bottle() {
+      say('Daj kotkowi mleczko – przytrzymaj butelkę przy pyszczku!');
+      var bt = s.add.container(0, 0), g = s.add.graphics(); bt.add(g); var lvl = 1;
+      function drawBt() { g.clear(); g.fillStyle(0xffffff).fillRoundedRect(-30, -150, 60, 110, 14); g.fillStyle(0xfff6e0).fillRect(-26, -150 + 110 * (1 - lvl) + 4, 52, 106 * lvl); g.lineStyle(5, 0x9aa8ba).strokeRoundedRect(-30, -150, 60, 110, 14); g.fillStyle(0xff9ac8).fillRoundedRect(-22, -40, 44, 16, 6); g.fillStyle(0xffd0a0).fillTriangle(-12, -24, 12, -24, 0, 0); }
+      drawBt(); tool(bt); var last = 0, h = 0; H.vetT = [[mouth.x, mouth.y]];
+      var mz = tmp(s.add.circle(mouth.x, mouth.y, 60, 0xffffff, 0).setStrokeStyle(5, 0xffb02e), 1007); s.tweens.add({ targets: mz, scale: 1.25, alpha: 0.4, duration: 600, yoyo: true, repeat: -1 });
+      V.tick = function () { if (!V.down || D(V.tip.x, V.tip.y, mouth.x, mouth.y) > 75) return; h += V.dt; lvl = Math.max(0, 1 - h / 2600); drawBt();
+        if (h - last > 450) { last = h; sfx('pop'); s.tweens.add({ targets: cat.outer, scaleY: CS * 0.97, duration: 120, yoyo: true }); }
+        if (lvl <= 0) { V.tick = null; cheer(mouth.x, mouth.y - 60, 6); win(); } };
+    }
+    function p4fish() {
+      say('Złów rybki dla kotka – stukaj w skaczące rybki!  0/3');
+      var pond = tmp(s.add.ellipse(360, 1170, 520, 120, 0x5ab8ff).setStrokeStyle(6, 0x2a7ad8), 1007); var got = 0, fishes = [];
+      var ev = s.time.addEvent({ delay: 1100, loop: true, callback: function () { if (V.done || got >= 3) return; var x = R(180, 540), f = A(txt(s, x, 1170, ['🐟', '🐠', '🐡'][R(0, 2)], 70, '#000000'), 1008); f.alive = true; fishes.push(f); sfx('pop');
+          s.tweens.add({ targets: f, y: 880, angle: R(-30, 30), duration: 1100, yoyo: true, ease: 'Sine.easeOut', onComplete: function () { f.alive = false; f.destroy(); } }); } });
+      objs.push({ scene: s, destroy: function () { ev.remove(); } });
+      V.downF = function (t, p) { fishes.forEach(function (f) { if (!f.alive || !f.scene || D(p.x, p.y, f.x, f.y) > 95) return; f.alive = false; s.tweens.killTweensOf(f); got++; sfx('twinkle'); vib(30);
+          s.tweens.add({ targets: f, x: mouth.x, y: mouth.y, scale: 0.3, duration: 450, ease: 'Cubic.easeIn', onComplete: function () { f.destroy(); munch(1); } });
+          say('Złów rybki dla kotka – stukaj w skaczące rybki!  ' + got + '/3'); if (got >= 3) { ev.remove(); s.time.delayedCall(900, function () { if (!V.done) win(); }); } }); };
+      H.vetFish = fishes;
+    }
+    function p4treats() {
+      say('Kotek jest głodny! Przeciągnij jedzenie do pyszczka!');
       var tray = tmp(s.add.graphics(), 1007); tray.fillStyle(0xffffff, 1).fillRoundedRect(130, 1080, 460, 140, 40); tray.lineStyle(6, 0xb8e6d4, 1).strokeRoundedRect(130, 1080, 460, 140, 40);
-      var foods = Phaser.Utils.Array.Shuffle(['🥣', '🐟', '🍤', '🥛', '🍗', '🧀']).slice(0, 3).map(function (e, k) { var f = tmp(txt(s, 230 + k * 130, 1150, e, 80, '#000000'), 1012); f.home = { x: f.x, y: f.y }; s.tweens.add({ targets: f, angle: { from: -6, to: 6 }, duration: 400 + k * 60, yoyo: true, repeat: -1 }); return f; });
+      var foods = Phaser.Utils.Array.Shuffle(['🥣', '🐟', '🍤', '🥛', '🍗', '🧀', '🍣', '🥚', '🦐', '🥩', '🍥', '🐠']).slice(0, 3).map(function (e, k) { var f = tmp(txt(s, 230 + k * 130, 1150, e, 80, '#000000'), 1012); f.home = { x: f.x, y: f.y }; s.tweens.add({ targets: f, angle: { from: -6, to: 6 }, duration: 400 + k * 60, yoyo: true, repeat: -1 }); return f; });
       var mz = tmp(s.add.circle(mouth.x, mouth.y, 60, 0xffffff, 0).setStrokeStyle(5, 0xffb02e), 1007); s.tweens.add({ targets: mz, scale: 1.25, alpha: 0.4, duration: 600, yoyo: true, repeat: -1 });
       var held = null, eaten = 0;
       V.downF = function (t, p) { foods.forEach(function (f) { if (!f.eaten && D(p.x, p.y, f.x, f.y) < 80) held = f; }); if (held) { s.tweens.killTweensOf(held); held.setScale(1.15).setPosition(p.x, p.y - 110); } };
@@ -4093,7 +4189,7 @@
       if (locked) A(txt(s, GW / 2, 1090, '+' + VET_GEMS + ' 💎', 74, '#9fe8ff', '#2a4fb0'), 1013);
       s.time.delayedCall(3200, function () { if (!t1.scene) return; hearts.remove(); closeModal(); if (locked) { gems += VET_GEMS; flyGems(s, GW / 2, 600, VET_GEMS, VET_GEMS); } updateHUD(); saveGame(); });
     }
-    H.vetDirt = dirt; H.vet = { tangles: tangles, hint: function () { return hint.text; }, go: { p1: p1, p2cold: p2cold, p2tummy: p2tummy, plasterStep: plasterStep, p2therm: p2therm, p2a: p2a, p2b: p2b, p3a: p3a, p3b: p3b, p3c: p3c, p3d: p3d, p4: p4 }, catB: function () { var t = cat.body.getBounds(); return [t.x, t.y, t.width, t.height, cat.outer.y, cat.outer.scaleX, cat.body.y, cat.body.displayHeight]; }, V: V, wounds: wounds, get bubbles() { return bubbles; }, get wet() { return wet; }, mouth: mouth, belly: belly, B: B };
+    H.vetDirt = dirt; H.vet = { tangles: tangles, hint: function () { return hint.text; }, go: { p4: p4, compress: compress, scarfStep: scarfStep, warmBottle: warmBottle, p1: p1, p2cold: p2cold, p2tummy: p2tummy, plasterStep: plasterStep, p2therm: p2therm, p2a: p2a, p2b: p2b, p3a: p3a, p3b: p3b, p3c: p3c, p3d: p3d, p4: p4 }, catB: function () { var t = cat.body.getBounds(); return [t.x, t.y, t.width, t.height, cat.outer.y, cat.outer.scaleX, cat.body.y, cat.body.displayHeight]; }, V: V, wounds: wounds, get bubbles() { return bubbles; }, get wet() { return wet; }, mouth: mouth, belly: belly, B: B };
     p1();
   }
 
@@ -4455,7 +4551,7 @@
     var c = Math.floor(coins);
     if (H.lastCoins !== c) { H.coinTxt.setText(devMode ? '999M' : fmt(c)); drawPills(); if (H.lastCoins !== undefined && c > H.lastCoins) pulse([H.coinTxt, H.coinIcon], 1.15, 200); H.lastCoins = c; }
     if (H.lastGems !== gems) { H.gemTxt.setText(devMode ? '999M' : fmt(gems)); drawPills(); if (H.lastGems !== undefined && gems > H.lastGems) pulse([H.gemTxt, H.gemIcon], 1.2, 250); H.lastGems = gems; }
-    var r = 0; cells.forEach(function (x) { if (x && x.type === 'cat') r += INCOME[x.level - 1]; }); r *= incomeMult();
+    var r = 0; cells.forEach(function (x) { if (x && x.type === 'cat') r += INCOME[x.level - 1] + (x.buddy ? INCOME[x.buddy.level - 1] : 0); }); r *= incomeMult();
     H.rate.setText(fmt(r) + '/s'); H.lvl.setText(String(pLevel)); H.expTxt.setText(pExp + ' / ' + need()); drawBar();
     var can = canGacha(); if (H.can !== can) { H.can = can; H.gachaBtn.setAlpha(can ? 1 : 0.55); H.gachaBg.setFillStyle(can ? 0xff5a7a : 0xb9b3bd); if (can) { H.pulse = H.scene.tweens.add({ targets: H.gachaBtn, scale: 1.07, duration: 500, yoyo: true, repeat: -1 }); } else { if (H.pulse) { H.pulse.stop(); H.pulse = null; } H.gachaBtn.setScale(1); } }
   }
@@ -5125,7 +5221,8 @@
       if (SV && Array.isArray(SV.cells)) SV.cells.forEach(function (c, i) {   // odtworzenie kotów i pudełek
         if (!c || i >= openCount || cells[i]) return;
         if (c.t === 'c' && c.l > MAX_LEVEL) c.l = MAX_LEVEL;   // Etap 48: kot z poziomu ponad MAX_LEVEL wraca jako najwyższy istniejący
-        if (c.t === 'c' && c.l >= 1 && c.l <= MAX_LEVEL) { discover(c.l); var rc = addCat(s, c.l, i, false); if (c.cr && toysOwned.crown) putCrown(rc); } else if (c.t === 'b') spawnBox(s, i, !!c.g, !!c.r);
+        if (c.t === 'c' && c.l >= 1 && c.l <= MAX_LEVEL) { discover(c.l); var rc = addCat(s, c.l, i, false); if (c.cr && toysOwned.crown) putCrown(rc);
+          if (c.b) { var bl = Math.min(MAX_LEVEL, c.b); discover(bl); var bc = addCat(s, bl, i, false); cells[i] = rc; pairUp(s, rc, bc, true); if (c.bc && toysOwned.crown) putCrown(bc); } } else if (c.t === 'b') spawnBox(s, i, !!c.g, !!c.r);
       });
       // dół: tylko transporter na środku + przycisk Kocia Łapka (szuflada menu)
       var CX = 360, cr = s.add.image(CX, 1148, 'crate').setDepth(30); cr.base = 188 / cr.width; cr.setScale(cr.base); var cz = s.add.zone(CX, 1150, 220, 190).setDepth(31).setInteractive(); H.carrier = cr;
@@ -5153,7 +5250,7 @@
       // pętle gry
       setupDrag(s);
       s.time.addEvent({ delay: 1000, loop: true, callback: function () { // pasywny przychód
-        cells.forEach(function (c) { if (c && c.type === 'cat') { var g = INCOME[c.level - 1] * incomeMult(); coins += g; if (!H.building) { incomeFloat(s, c, '+' + fmt(Math.round(g))); hop(s, c); } } });
+        cells.forEach(function (c0) { if (c0 && c0.type === 'cat') [c0, c0.buddy].forEach(function (c) { if (!c) return; var g = INCOME[c.level - 1] * incomeMult(); coins += g; if (!H.building) { incomeFloat(s, c, '+' + fmt(Math.round(g))); hop(s, c); } }); });
         updateHUD();
       } });
       s.time.addEvent({ delay: AUTO_SPAWN_MS, loop: true, callback: function () { // pasywny auto-spawn, niezależny od transportera
@@ -5171,12 +5268,12 @@
         for (var q = 0; q < openCount; q++) { discover(1 + q % 4); addCat(s, 1 + q % 4, q, false); }
         s.time.addEvent({ delay: 2600, loop: true, callback: function () { if (openCount >= NSLOTS) return; addExp(s, need(), 360, 700); var n = openCount - 1; if (!cells[n]) { var lv = 1 + (n * 7) % 4; discover(lv); addCat(s, lv, n, true); } } });
       }
-      if (/[?&]debug=1/.test(window.location.search)) window.__cc = { openVet: openVet, themeOf: themeOf, getSecret: function () { return SECRET; }, getOwned: function () { return owned; }, crownSpot: crownSpot, discover: discover, spawnBox: spawnBox, openRainbow: openRainbow, buildCat: buildCat, openDance: openDance, DNget: function () { return DN; }, startConcert: startConcert, pickCat: pickCat, openMinigames: openMinigames, H: H, cells: cells, SX: SX, SY: SY, openCount: function () { return openCount; }, addExp: addExp, need: need, addCat: addCat, discover: discover, spawnBalloon: spawnBalloon, revealBall: revealBall, openMemory: openMemory, openMap: openMap, openAlbum: openAlbum, openShop: openShop, popBalloon: popBalloon, setGems: function (n) { gems = n; updateHUD(); }, openShelf: openShelf, fitCam: fitCam, getState: function () { return { gems: gems, coins: coins, pLevel: pLevel }; } };
+      if (/[?&]debug=1/.test(window.location.search)) window.__cc = { setAUC: function (a) { AUC = a; }, concertMusic: concertMusic, DN_BPM: DN_BPM, slotPos: slotPos, openVet: openVet, themeOf: themeOf, getSecret: function () { return SECRET; }, getOwned: function () { return owned; }, crownSpot: crownSpot, discover: discover, spawnBox: spawnBox, openRainbow: openRainbow, buildCat: buildCat, openDance: openDance, DNget: function () { return DN; }, startConcert: startConcert, pickCat: pickCat, openMinigames: openMinigames, H: H, cells: cells, SX: SX, SY: SY, openCount: function () { return openCount; }, addExp: addExp, need: need, addCat: addCat, discover: discover, spawnBalloon: spawnBalloon, revealBall: revealBall, openMemory: openMemory, openMap: openMap, openAlbum: openAlbum, openShop: openShop, popBalloon: popBalloon, setGems: function (n) { gems = n; updateHUD(); }, openShelf: openShelf, fitCam: fitCam, getState: function () { return { gems: gems, coins: coins, pLevel: pLevel }; } };
     }
   });
 
   // Etap 42b: grafiki SVG rysowane na canvas przed startem (bez XHR na blob: – nie działało w niektórych przeglądarkach)
-  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'7349799e', BUILD_ID = /*BUILDID*/'24.11 20:55'; try { document.getElementById('ccVer').textContent = 'wersja ' + BUILD_ID; } catch (e) { }
+  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'7349799e', BUILD_ID = /*BUILDID*/'25.11 14:57'; try { document.getElementById('ccVer').textContent = 'wersja ' + BUILD_ID; } catch (e) { }
   function imgUrl(f) { return f.replace(/\.png$/, IMG_EXT) + (ASSET_V !== 'dev' ? '?v=' + ASSET_V : ''); }   // Etap 43: grafiki jako WebP (5× mniejsze), PNG gdy przeglądarka nie umie
   var PREIMG = {};
   function preImgs() {   // Etap 43: grafiki kotów pobierają się i dekodują od razu, równolegle z resztą startu (atlas, zapis online, uruchamianie Phasera)
