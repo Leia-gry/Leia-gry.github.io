@@ -2996,14 +2996,14 @@
   }
   var ADV_KEY = 'cc_advent_' + (new Date().getMonth() === 0 ? new Date().getFullYear() - 1 : new Date().getFullYear());
   function advState() { try { return JSON.parse(localStorage.getItem(ADV_KEY) || '{}'); } catch (e) { return {}; } }
-  function adventAvail() { var st = advState(), d = new Date(), today = d.getMonth() === 11 ? d.getDate() : (d.getMonth() === 0 ? 24 : 0), out = []; if (!st[0]) out.push(0); for (var n = 1; n <= Math.min(24, today); n++) if (!st[n]) out.push(n); return out; }
+  function adventAvail() { var st = advState(), d = new Date(), today = d.getMonth() === 11 ? d.getDate() : (d.getMonth() === 0 ? 24 : 0), out = []; for (var n = 1; n <= Math.min(24, today); n++) if (!st[n]) out.push(n); return out; }
   function openAdvent(s) {
     if (modalObjs.length) return; overlay(s); var st = advState(), av = adventAvail();
     var g = mAdd(s.add.graphics(), 1001); g.fillStyle(0x1c4a2c, 1).fillRoundedRect(40, 170, 640, 960, 40); g.lineStyle(10, 0xffd23f, 1).strokeRoundedRect(40, 170, 640, 960, 40);
     mAdd(txt(s, GW / 2, 230, '🎄 Kalendarz adwentowy 🎄', 40, '#ffffff', '#c8203a'), 1002);
-    mAdd(txt(s, GW / 2, 280, 'Codziennie w grudniu nowe okienko z prezentem!', 24, '#fff3a8'), 1002);
+    var _d = new Date(), _pre = _d.getMonth() === 10; mAdd(txt(s, GW / 2, 280, _pre ? 'Pierwsze okienko: wtorek, 1 grudnia!' : 'Codziennie w grudniu nowe okienko z prezentem!', 24, '#fff3a8'), 1002);
     var cols2 = [0xe8323c, 0x2f9a4a, 0x3fa7ff, 0xffb02e, 0xb36bff];
-    for (var n = 0; n <= 24; n++) (function (n) {
+    for (var n = 1; n <= 24; n++) (function (n) {
       var cx = n === 0 ? GW / 2 : 110 + ((n - 1) % 6) * 100, cy = n === 0 ? 1040 : 360 + Math.floor((n - 1) / 6) * 140;
       var open = !!st[n], can = av.indexOf(n) >= 0, w = n === 0 ? 300 : 86;
       var b = mAdd(s.add.rectangle(cx, cy, w, 110, open ? 0x0e2a18 : cols2[n % 5]).setStrokeStyle(5, can ? 0xffffff : 0x0e2a18).setInteractive(), 1003);
@@ -5403,7 +5403,7 @@
   });
 
   // Etap 42b: grafiki SVG rysowane na canvas przed startem (bez XHR na blob: – nie działało w niektórych przeglądarkach)
-  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'7349799e', BUILD_ID = /*BUILDID*/'27.11 19:58'; try { var _d = new Date(), _x = (_d.getMonth() === 10 && _d.getDate() >= 20) || _d.getMonth() === 11 || (_d.getMonth() === 0 && _d.getDate() <= 6); document.getElementById('ccVer').textContent = (_x ? '🎄 Wesołych Świąt! 🎅  ·  ' : '') + 'wersja ' + BUILD_ID; } catch (e) { }
+  var PRESVG = {}, SVGFAIL = 0, IMG_EXT = '.png', ASSET_V = /*ASSETV*/'7349799e', BUILD_ID = /*BUILDID*/'27.11 20:17'; try { var _d = new Date(), _x = (_d.getMonth() === 10 && _d.getDate() >= 20) || _d.getMonth() === 11 || (_d.getMonth() === 0 && _d.getDate() <= 6); document.getElementById('ccVer').textContent = (_x ? '🎄 Wesołych Świąt! 🎅  ·  ' : '') + 'wersja ' + BUILD_ID; } catch (e) { }
   function imgUrl(f) { return f.replace(/\.png$/, IMG_EXT) + (ASSET_V !== 'dev' ? '?v=' + ASSET_V : ''); }   // Etap 43: grafiki jako WebP (5× mniejsze), PNG gdy przeglądarka nie umie
   var PREIMG = {};
   function preImgs() {   // Etap 43: grafiki kotów pobierają się i dekodują od razu, równolegle z resztą startu (atlas, zapis online, uruchamianie Phasera)
